@@ -96,7 +96,7 @@
 
         /* Đồng hồ kim */
         .analog-clock {
-            width: 160px; /* Tăng kích thước để chứa số */
+            width: 160px; 
             height: 160px;
             border: 5px solid #fff;
             border-radius: 50%;
@@ -111,30 +111,16 @@
             transform: translate(-50%, -50%); z-index: 20;
         }
         
-        /* Các con số trên đồng hồ */
         .clock-number {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 30px;
-            height: 30px;
-            margin-top: -15px;
-            margin-left: -15px;
-            text-align: center;
-            line-height: 30px;
-            color: #fff;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-size: 1.2rem;
-            font-weight: bold;
-            z-index: 5;
+            position: absolute; top: 50%; left: 50%; width: 30px; height: 30px;
+            margin-top: -15px; margin-left: -15px; text-align: center; line-height: 30px;
+            color: #fff; font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 1.2rem; font-weight: bold; z-index: 5;
         }
 
         .hand {
-            position: absolute;
-            bottom: 50%;
-            transform-origin: bottom center;
-            background: #fff;
-            border-radius: 10px;
+            position: absolute; bottom: 50%; transform-origin: bottom center;
+            background: #fff; border-radius: 10px;
         }
         .hour-hand { width: 6px; height: 40px; left: calc(50% - 3px); z-index: 10; }
         .minute-hand { width: 4px; height: 60px; left: calc(50% - 2px); background: #bdc3c7; z-index: 11; }
@@ -170,25 +156,21 @@
             font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff; white-space: nowrap;
         }
 
-        /* Hiệu ứng gạch */
+        /* Hiệu ứng gạch nhiều nét */
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
             background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
             display: none; z-index: 10;
         }
-        .crossed.style-nhieunet .slash-nhieunet { display: block; }
-        .slash-netcheo {
-            position: absolute; width: 130%; height: 5px; background-color: var(--slash-color);
-            top: 50%; left: -15%; transform: rotate(-60deg); display: none;
-        }
-        .crossed.style-netcheo .slash-netcheo { display: block; }
-        .crossed.style-lammo { opacity: 0.2; filter: grayscale(100%); transition: all 0.5s; }
+        .crossed .slash-nhieunet { display: block; }
 
         /* Chỉ báo */
         .status-indicator { position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6; }
         .rec-dot { width: 12px; height: 12px; background-color: #e74c3c; border-radius: 50%; }
         .running .rec-dot { animation: blink 1.5s infinite; box-shadow: 0 0 10px #e74c3c; }
-        .status-text { font-family: 'Arial', cursive, sans-serif; font-size: 1rem; color: #fff; }
+        
+        /* Font chữ Arial theo yêu cầu */
+        .status-text { font-family: Arial, sans-serif; font-size: 1rem; color: #fff; font-weight: bold; letter-spacing: 1px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
@@ -218,13 +200,6 @@
             <label>Màu gạch: <input type="color" id="slashColor" value="#e74c3c"></label>
             <label>Bề ngang: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
             <label>Độ cao: <input type="range" id="boardHeight" min="250" max="700" value="350"></label>
-            <label>Gạch: 
-                <select id="slashStyle">
-                    <option value="style-nhieunet">Nhiều nét</option>
-                    <option value="style-netcheo">1 Nét chéo</option>
-                    <option value="style-lammo">Xóa mờ</option>
-                </select>
-            </label>
         </div>
         <div class="control-group">
             <label><input type="checkbox" id="checkAnalog" checked> Đồng hồ kim</label>
@@ -248,7 +223,7 @@
                 <div class="hand hour-hand" id="hourHand"></div>
                 <div class="hand minute-hand" id="minuteHand"></div>
                 <div class="hand second-hand" id="secondHand"></div>
-                </div>
+            </div>
             
             <div id="digitalClock" class="digital-clock">0:00:00</div>
         </div>
@@ -287,17 +262,14 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // Vẽ 12 số cho đồng hồ kim
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
-            // Bán kính để đặt số (Khoảng cách từ tâm ra chữ số)
             const radius = 62; 
             for (let i = 1; i <= 12; i++) {
                 const num = document.createElement('div');
                 num.className = 'clock-number';
                 num.textContent = i;
-                const angle = i * 30; // Mỗi số cách nhau 30 độ
-                // CSS xoay: Xoay đi -> Đẩy ra -> Xoay ngược lại để số luôn đứng thẳng
+                const angle = i * 30;
                 num.style.transform = `rotate(${angle}deg) translate(0, -${radius}px) rotate(-${angle}deg)`;
                 clock.appendChild(num);
             }
@@ -376,7 +348,7 @@
             for(let i = 0; i < numSegments; i++) {
                 const seg = document.createElement('div');
                 seg.className = 'segment';
-                seg.innerHTML = `<div class="slash-nhieunet"></div><div class="slash-netcheo"></div>`;
+                seg.innerHTML = `<div class="slash-nhieunet"></div>`;
                 
                 let currentMinuteTick = (i + 1) * interval;
                 
@@ -422,10 +394,9 @@
 
             const elapsed = totalSeconds - remainingSeconds;
             const crossed = Math.floor(elapsed / segmentDurationSeconds);
-            const style = document.getElementById('slashStyle').value;
             if (crossed > currentCrossedCount) {
                 const segs = document.querySelectorAll('.segment');
-                for (let i = currentCrossedCount; i < crossed; i++) if(segs[i]) segs[i].classList.add('crossed', style);
+                for (let i = currentCrossedCount; i < crossed; i++) if(segs[i]) segs[i].classList.add('crossed');
                 currentCrossedCount = crossed;
             }
         }
