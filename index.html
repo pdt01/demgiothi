@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trục Thời Gian - Có Âm Thanh</title>
+    <title>Trục Thời Gian - Chuông Báo Chân Thực</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -185,7 +185,7 @@
                 </select>
             </label>
             <label style="color: #2ecc71; margin-left: 10px;">
-                <input type="checkbox" id="soundToggle" checked> Bật âm thanh
+                <input type="checkbox" id="soundToggle" checked> Bật chuông báo
             </label>
         </div>
         
@@ -225,40 +225,68 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // Cập nhật biến CSS ngay lập tức
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
         document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
 
-        // Hàm tạo âm thanh tổng hợp (Web Audio API)
+        // THUẬT TOÁN TẠO CHUÔNG ĐIỆN TRƯỜNG HỌC
         function playAlarm() {
             if (!document.getElementById('soundToggle').checked) return;
             
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
-            const playBeep = (startTime) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'square'; // Tiếng bíp điện tử
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime + startTime);
-                
-                gain.gain.setValueAtTime(0, audioCtx.currentTime + startTime);
-                gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + startTime + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + startTime + 0.4);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(audioCtx.currentTime + startTime);
-                osc.stop(audioCtx.currentTime + startTime + 0.5);
-            };
+            const duration = 3.0; // Chuông kéo dài 3 giây
+            const t = audioCtx.currentTime;
 
-            // Tạo chuỗi 4 tiếng Bíp
-            playBeep(0);
-            playBeep(0.4);
-            playBeep(0.8);
-            playBeep(1.2);
+            // 1. Tạo 2 âm thanh chói (square wave) lệch tần số để tạo độ vang kim loại
+            const osc1 = audioCtx.createOscillator();
+            osc1.type = 'square';
+            osc1.frequency.value = 750; // Tần số 1
+
+            const osc2 = audioCtx.createOscillator();
+            osc2.type = 'square';
+            osc2.frequency.value = 1000; // Tần số 2
+
+            // 2. Tạo hiệu ứng búa gõ liên tục (Tremolo/LFO)
+            const lfo = audioCtx.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 35; // Gõ 35 lần mỗi giây
+
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 1; // Độ mạnh của búa gõ
+
+            // 3. Điều khiển âm lượng tổng (Fade in nhanh, giữ nguyên, rồi Fade out dần)
+            const mainGain = audioCtx.createGain();
+            mainGain.gain.setValueAtTime(0, t);
+            mainGain.gain.linearRampToValueAtTime(0.25, t + 0.1); // Bật tiếng
+            mainGain.gain.setValueAtTime(0.25, t + duration - 1); // Kéo dài tiếng
+            mainGain.gain.exponentialRampToValueAtTime(0.001, t + duration); // Tắt dần
+
+            // Kết nối sơ đồ âm thanh: LFO -> lfoGain -> Âm lượng chính của osc1/osc2
+            lfo.connect(lfoGain);
+            
+            const vca = audioCtx.createGain();
+            vca.gain.value = 0;
+            lfoGain.connect(vca.gain);
+            // Đặt base gain để tiếng không bị cắt hẳn
+            vca.gain.setValueAtTime(0.5, t); 
+
+            osc1.connect(vca);
+            osc2.connect(vca);
+            vca.connect(mainGain);
+            mainGain.connect(audioCtx.destination);
+
+            // Bắt đầu phát
+            osc1.start(t);
+            osc2.start(t);
+            lfo.start(t);
+
+            // Dừng phát
+            osc1.stop(t + duration);
+            osc2.stop(t + duration);
+            lfo.stop(t + duration);
         }
 
         function init() {
@@ -333,7 +361,7 @@
             if (isRunning) return;
             if (remainingSeconds <= 0) init();
             
-            // Khởi tạo/Mở khóa AudioContext khi người dùng tương tác (nhấn nút)
+            // Yêu cầu quyền phát âm thanh từ trình duyệt khi ấn nút Bắt đầu
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -355,8 +383,7 @@
                     document.getElementById('slashStyle').disabled = false;
                     document.getElementById('timeUpMsg').style.display = 'block';
                     
-                    // Phát âm thanh báo hiệu
-                    playAlarm();
+                    playAlarm(); // Kích hoạt chuông điện
                 }
             }, 1000);
         }
