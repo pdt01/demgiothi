@@ -10,6 +10,7 @@
             --board-border: #8b5a2b;
             --slash-color: #e74c3c;
             --board-width: 85%;
+            --board-min-height: 350px;
         }
 
         body {
@@ -34,7 +35,7 @@
             flex-direction: column;
             gap: 12px;
             width: 100%;
-            max-width: 1000px;
+            max-width: 1050px;
             z-index: 100;
         }
 
@@ -53,6 +54,7 @@
         input[type="text"] { width: 100px; font-family: monospace; }
         input[type="color"] { cursor: pointer; padding: 0; width: 30px; height: 30px; }
         input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        input[type="range"] { width: 80px; }
         
         .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; }
 
@@ -74,7 +76,7 @@
             padding: 60px 50px;
             width: var(--board-width);
             max-width: 1100px;
-            min-height: 300px;
+            min-height: var(--board-min-height);
             box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5);
             position: relative;
             display: flex;
@@ -85,27 +87,59 @@
             transition: all 0.3s ease;
         }
 
+        /* Vùng chứa các loại đồng hồ */
+        .clocks-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 40px;
+        }
+
+        /* Đồng hồ kim */
+        .analog-clock {
+            width: 130px;
+            height: 130px;
+            border: 5px solid #fff;
+            border-radius: 50%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4), 0 0 10px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .analog-clock::before {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            background: #fff; border-radius: 50%; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 20;
+        }
+        /* Các vạch chia giờ đơn giản */
+        .analog-clock::after {
+            content: ''; position: absolute; width: 2px; height: 10px; background: rgba(255,255,255,0.5);
+            top: 2px; left: calc(50% - 1px);
+            box-shadow: 0 106px 0 rgba(255,255,255,0.5);
+        }
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            transform-origin: bottom center;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .hour-hand { width: 6px; height: 35px; left: calc(50% - 3px); z-index: 10; }
+        .minute-hand { width: 4px; height: 50px; left: calc(50% - 2px); background: #bdc3c7; z-index: 11; }
+        .second-hand { width: 2px; height: 60px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
+
+        /* Đồng hồ số */
         .digital-clock {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 6rem;
+            font-size: 5.5rem;
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0 20px rgba(255,255,255,0.3);
-            margin-bottom: 40px;
             display: none; 
         }
 
-        .timeline-container { 
-            position: relative; 
-            width: 100%; 
-            margin-top: 40px;
-            display: block; 
-        }
-
-        .time-label {
-            position: absolute; top: -60px; font-size: 2.2rem;
-            font-family: 'Comic Sans MS', cursive, sans-serif; color: #fff;
-        }
+        .timeline-container { position: relative; width: 100%; margin-top: 20px; display: block; }
+        .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: 'Comic Sans MS', cursive, sans-serif; color: #fff; }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
@@ -121,28 +155,25 @@
 
         .tick-label {
             position: absolute; bottom: -45px; right: -2px; transform: translateX(50%);
-            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff;
-            white-space: nowrap;
+            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff; white-space: nowrap;
         }
 
+        /* Hiệu ứng gạch */
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
             background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
             display: none; z-index: 10;
         }
         .crossed.style-nhieunet .slash-nhieunet { display: block; }
-        
         .slash-netcheo {
             position: absolute; width: 130%; height: 5px; background-color: var(--slash-color);
             top: 50%; left: -15%; transform: rotate(-60deg); display: none;
         }
         .crossed.style-netcheo .slash-netcheo { display: block; }
-
         .crossed.style-lammo { opacity: 0.2; filter: grayscale(100%); transition: all 0.5s; }
 
-        .status-indicator {
-            position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6;
-        }
+        /* Chỉ báo */
+        .status-indicator { position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6; }
         .rec-dot { width: 12px; height: 12px; background-color: #e74c3c; border-radius: 50%; }
         .running .rec-dot { animation: blink 1.5s infinite; box-shadow: 0 0 10px #e74c3c; }
         .status-text { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1rem; color: #fff; }
@@ -173,7 +204,8 @@
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
             <label>Màu viền: <input type="color" id="borderColor" value="#8b5a2b"></label>
             <label>Màu gạch: <input type="color" id="slashColor" value="#e74c3c"></label>
-            <label>Cỡ bảng: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
+            <label>Bề ngang: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
+            <label>Độ cao: <input type="range" id="boardHeight" min="250" max="700" value="350"></label>
             <label>Gạch: 
                 <select id="slashStyle">
                     <option value="style-nhieunet">Nhiều nét</option>
@@ -183,7 +215,8 @@
             </label>
         </div>
         <div class="control-group">
-            <label><input type="checkbox" id="checkClock"> Hiện đồng hồ số</label>
+            <label><input type="checkbox" id="checkAnalog"> Đồng hồ kim</label>
+            <label><input type="checkbox" id="checkClock"> Đồng hồ số</label>
             <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
             <label><input type="checkbox" id="soundToggle" checked> Bật chuông</label>
         </div>
@@ -198,7 +231,15 @@
     </div>
 
     <div class="board" id="mainBoard">
-        <div id="digitalClock" class="digital-clock">00:00:00</div>
+        <div class="clocks-wrapper">
+            <div id="analogClock" class="analog-clock">
+                <div class="hand hour-hand" id="hourHand"></div>
+                <div class="hand minute-hand" id="minuteHand"></div>
+                <div class="hand second-hand" id="secondHand"></div>
+            </div>
+            
+            <div id="digitalClock" class="digital-clock">0:00:00</div>
+        </div>
 
         <div id="timelineContainer" class="timeline-container">
             <div class="time-label start-label" id="startLabel">8h30</div>
@@ -214,36 +255,49 @@
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
     </div>
 
+    <div style="margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;">
+        Công cụ này được phát triển bởi <b>PDT and Friends</b>.<br>
+        Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a> (Vui lòng không sử dụng cho mục đích thương mại).
+    </div>
+
     <script>
         let timerInterval;
         let totalSeconds = 0, remainingSeconds = 0, segmentDurationSeconds = 0;
+        let startH = 0, startM = 0; 
         let isRunning = false, currentCrossedCount = 0;
         let audioCtx;
         
         const timelineEl = document.getElementById('timeline');
         const boardEl = document.getElementById('mainBoard');
         const digitalClockEl = document.getElementById('digitalClock');
+        const analogClockEl = document.getElementById('analogClock');
         const timelineContainerEl = document.getElementById('timelineContainer');
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
         const updateVisibility = () => {
             digitalClockEl.style.display = document.getElementById('checkClock').checked ? 'block' : 'none';
+            analogClockEl.style.display = document.getElementById('checkAnalog').checked ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
+        // Lắng nghe sự thay đổi UI
         document.getElementById('checkClock').addEventListener('change', updateVisibility);
+        document.getElementById('checkAnalog').addEventListener('change', updateVisibility);
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
+        
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
         document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
+        document.getElementById('boardHeight').addEventListener('input', (e) => rootVars.setProperty('--board-min-height', e.target.value + 'px'));
 
-        function formatTime(s) {
+        // Format đếm ngược: Không có số 0 ở đầu giờ (h:mm:ss)
+        function formatDigitalTime(s) {
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
             const sec = s % 60;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
         function playAlarm() {
@@ -273,7 +327,7 @@
             const labelMode = document.getElementById('labelMode').value;
             const labelArray = labelsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
             
-            let [startH, startM] = startStr.split(':').map(Number);
+            [startH, startM] = startStr.split(':').map(Number);
             let endTotalMins = startH * 60 + startM + duration;
             document.getElementById('startLabel').textContent = startH + 'h' + (startM<10?'0'+startM:startM);
             document.getElementById('endLabel').textContent = (Math.floor(endTotalMins/60)%24) + 'h' + (endTotalMins%60<10?'0'+(endTotalMins%60):endTotalMins%60);
@@ -282,7 +336,9 @@
             remainingSeconds = totalSeconds;
             segmentDurationSeconds = interval * 60;
             
-            digitalClockEl.textContent = formatTime(remainingSeconds);
+            digitalClockEl.textContent = formatDigitalTime(remainingSeconds);
+            updateAnalogClock(remainingSeconds);
+
             timelineEl.innerHTML = '';
             document.getElementById('timeUpMsg').style.display = 'none';
             boardEl.classList.remove('running');
@@ -304,13 +360,11 @@
                     if (labelMode === 'elapsed') {
                         label.textContent = currentMinuteTick + 'p';
                     } else {
-                        // Tính giờ thực tế
                         let tickTotalMins = startH * 60 + startM + currentMinuteTick;
                         let tickH = Math.floor(tickTotalMins / 60) % 24;
                         let tickM = tickTotalMins % 60;
                         label.textContent = tickH + 'h' + (tickM < 10 ? '0' + tickM : tickM);
                     }
-                    
                     seg.appendChild(label);
                 }
                 timelineEl.appendChild(seg);
@@ -318,8 +372,28 @@
             updateVisibility();
         }
 
+        function updateAnalogClock(remSecs) {
+            // Tính toán thời gian thực tế đang mô phỏng (Giờ bắt đầu + Thời gian đã trôi qua)
+            const elapsedSecs = totalSeconds - remSecs;
+            const currentSimulatedSecs = (startH * 3600) + (startM * 60) + elapsedSecs;
+
+            const h = Math.floor(currentSimulatedSecs / 3600);
+            const m = Math.floor((currentSimulatedSecs % 3600) / 60);
+            const s = currentSimulatedSecs % 60;
+
+            const degH = (h % 12) * 30 + m * 0.5;
+            const degM = m * 6 + s * 0.1;
+            const degS = s * 6;
+
+            document.getElementById('hourHand').style.transform = `rotate(${degH}deg)`;
+            document.getElementById('minuteHand').style.transform = `rotate(${degM}deg)`;
+            document.getElementById('secondHand').style.transform = `rotate(${degS}deg)`;
+        }
+
         function update() {
-            digitalClockEl.textContent = formatTime(remainingSeconds);
+            digitalClockEl.textContent = formatDigitalTime(remainingSeconds);
+            updateAnalogClock(remainingSeconds);
+
             const elapsed = totalSeconds - remainingSeconds;
             const crossed = Math.floor(elapsed / segmentDurationSeconds);
             const style = document.getElementById('slashStyle').value;
@@ -364,12 +438,10 @@
         }
 
         function resetTimer() { applySettings(); }
+        
+        // Cài đặt chiều cao ban đầu
+        document.documentElement.style.setProperty('--board-min-height', document.getElementById('boardHeight').value + 'px');
         init();
     </script>
-    <div style="margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;">
-    Công cụ này được phát triển bởi <b>PDT and Friends</b>.<br>
-    Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a> (Vui lòng không sử dụng cho mục đích thương mại).
-</div>
-</div>
 </body>
 </html>
