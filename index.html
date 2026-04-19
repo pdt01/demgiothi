@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trục Thời Gian - PDT and Friends</title>
+    <title>Trục Thời Gian - Có Âm Thanh</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -26,7 +26,7 @@
 
         .control-panel {
             background: #34495e;
-            padding: 20px;
+            padding: 20px 30px;
             border-radius: 12px;
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -48,7 +48,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        label { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        label { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         input, select {
             padding: 6px;
             border-radius: 4px;
@@ -57,36 +57,25 @@
         }
         input[type="text"] { width: 120px; font-family: monospace; }
         input[type="color"] { cursor: pointer; padding: 0; width: 35px; height: 35px; }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         
         .helper-text {
-            text-align: center;
-            font-style: italic;
-            color: #f1c40f;
-            font-size: 13px;
-            margin-top: -5px;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
+            text-align: center; font-style: italic; color: #f1c40f;
+            font-size: 13px; margin-top: -5px; margin-bottom: 5px; letter-spacing: 0.5px;
         }
 
         .btn-group { display: flex; gap: 15px; justify-content: center; }
         button {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            padding: 10px 25px; border: none; border-radius: 5px;
+            font-weight: bold; cursor: pointer; text-transform: uppercase;
+            transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
         #btnApply { background: #3498db; color: white; }
         #btnApply:hover { background: #2980b9; }
-        
         #btnStart { background: #27ae60; color: white; }
         #btnStart:hover { background: #2ecc71; }
-        
         #btnReset { background: #e74c3c; color: white; }
         #btnReset:hover { background: #c0392b; }
 
@@ -107,31 +96,18 @@
         .timeline-container { position: relative; width: 100%; }
 
         .time-label {
-            position: absolute;
-            top: -65px;
-            font-size: 2.5rem;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            color: rgba(255,255,255,0.9);
+            position: absolute; top: -65px; font-size: 2.5rem;
+            font-family: 'Comic Sans MS', cursive, sans-serif; color: rgba(255,255,255,0.9);
         }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
-        /* Trục chính */
         .timeline-track {
-            position: relative;
-            display: flex;
-            width: 100%;
-            height: 5px;
-            background-color: #fff;
+            position: relative; display: flex; width: 100%; height: 5px; background-color: #fff;
         }
         .timeline-track::after {
-            content: '';
-            position: absolute;
-            right: -25px;
-            top: -10px;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            border-left: 25px solid #fff;
+            content: ''; position: absolute; right: -25px; top: -10px;
+            border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 25px solid #fff;
         }
 
         .segment { flex: 1; position: relative; }
@@ -139,18 +115,14 @@
         .segment:last-child::after { content: ''; position: absolute; right: 0; top: -12px; width: 4px; height: 30px; background-color: #fff; }
 
         .tick-label {
-            position: absolute; bottom: -45px; right: -2px; 
-            transform: translateX(50%);
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-size: 1.8rem; color: #fff; white-space: nowrap;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            position: absolute; bottom: -45px; right: -2px; transform: translateX(50%);
+            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.8rem; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* --- CÁC KIỂU GẠCH --- */
+        /* Các kiểu gạch */
         .slash-netcheo {
             position: absolute; width: 130%; height: 5px; background-color: var(--slash-color);
-            top: 50%; left: -15%; transform: rotate(-60deg); box-shadow: 0 0 5px var(--slash-color);
-            display: none; z-index: 10;
+            top: 50%; left: -15%; transform: rotate(-60deg); box-shadow: 0 0 5px var(--slash-color); display: none; z-index: 10;
         }
         .crossed.style-netcheo .slash-netcheo { display: block; }
         
@@ -164,19 +136,15 @@
 
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
-            background: repeating-linear-gradient(
-                -60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px
-            );
+            background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
             display: none; z-index: 10; opacity: 0.9;
         }
         .crossed.style-nhieunet .slash-nhieunet { display: block; }
-
         .crossed.style-lammo { opacity: 0.2; filter: grayscale(100%); transition: all 0.5s; }
 
-        /* ĐÈN BÁO HIỆU */
+        /* Đèn báo hiệu */
         .status-indicator {
-            position: absolute; bottom: 25px; left: 30px;
-            display: flex; align-items: center; gap: 12px; opacity: 0.6;
+            position: absolute; bottom: 25px; left: 30px; display: flex; align-items: center; gap: 12px; opacity: 0.6;
         }
         .rec-dot { width: 15px; height: 15px; background-color: #e74c3c; border-radius: 50%; display: inline-block; }
         .running .rec-dot { animation: blink 1.5s infinite ease-in-out; box-shadow: 0 0 15px #e74c3c; }
@@ -206,7 +174,7 @@
         <div class="control-group">
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
             <label>Màu viền: <input type="color" id="borderColor" value="#8b5a2b"></label>
-            <label>Màu phấn gạch: <input type="color" id="slashColor" value="#e74c3c"></label>
+            <label>Màu gạch: <input type="color" id="slashColor" value="#e74c3c"></label>
             <label>Cỡ bảng: <input type="range" id="boardWidth" min="60" max="100" value="85"></label>
             <label>Kiểu: 
                 <select id="slashStyle">
@@ -215,6 +183,9 @@
                     <option value="style-daux">Dấu X</option>
                     <option value="style-lammo">Xóa mờ</option>
                 </select>
+            </label>
+            <label style="color: #2ecc71; margin-left: 10px;">
+                <input type="checkbox" id="soundToggle" checked> Bật âm thanh
             </label>
         </div>
         
@@ -247,17 +218,48 @@
         let timerInterval;
         let totalSeconds = 0, remainingSeconds = 0, segmentDurationSeconds = 0;
         let isRunning = false, currentCrossedCount = 0;
+        let audioCtx;
         
         const timelineEl = document.getElementById('timeline');
         const boardEl = document.getElementById('mainBoard');
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // Cập nhật biến CSS ngay lập tức khi kéo/chọn
+        // Cập nhật biến CSS ngay lập tức
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
         document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
+
+        // Hàm tạo âm thanh tổng hợp (Web Audio API)
+        function playAlarm() {
+            if (!document.getElementById('soundToggle').checked) return;
+            
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const playBeep = (startTime) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square'; // Tiếng bíp điện tử
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime + startTime);
+                
+                gain.gain.setValueAtTime(0, audioCtx.currentTime + startTime);
+                gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + startTime + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + startTime);
+                osc.stop(audioCtx.currentTime + startTime + 0.5);
+            };
+
+            // Tạo chuỗi 4 tiếng Bíp
+            playBeep(0);
+            playBeep(0.4);
+            playBeep(0.8);
+            playBeep(1.2);
+        }
 
         function init() {
             const startStr = document.getElementById('startTime').value;
@@ -320,7 +322,6 @@
         }
 
         function applySettings() {
-            // Dừng bộ đếm nếu đang chạy và vẽ lại bảng
             clearInterval(timerInterval);
             isRunning = false;
             document.getElementById('btnStart').disabled = false;
@@ -331,6 +332,10 @@
         function startTimer() {
             if (isRunning) return;
             if (remainingSeconds <= 0) init();
+            
+            // Khởi tạo/Mở khóa AudioContext khi người dùng tương tác (nhấn nút)
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             
             isRunning = true;
             boardEl.classList.add('running');
@@ -349,16 +354,17 @@
                     document.getElementById('btnStart').disabled = false;
                     document.getElementById('slashStyle').disabled = false;
                     document.getElementById('timeUpMsg').style.display = 'block';
+                    
+                    // Phát âm thanh báo hiệu
+                    playAlarm();
                 }
             }, 1000);
         }
 
         function resetTimer() {
-            // Chỉ xóa trắng quá trình đếm, giữ nguyên cài đặt hiện tại
             applySettings();
         }
 
-        // Khởi tạo lần đầu
         init();
     </script>
 </body>
