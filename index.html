@@ -85,7 +85,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Đồng hồ đếm ngược số */
         .digital-clock {
             font-family: 'Courier New', Courier, monospace;
             font-size: 6rem;
@@ -93,14 +92,14 @@
             color: #fff;
             text-shadow: 0 0 20px rgba(255,255,255,0.3);
             margin-bottom: 40px;
-            display: none; /* Mặc định ẩn */
+            display: none; 
         }
 
         .timeline-container { 
             position: relative; 
             width: 100%; 
             margin-top: 40px;
-            display: block; /* Mặc định hiện */
+            display: block; 
         }
 
         .time-label {
@@ -123,9 +122,9 @@
         .tick-label {
             position: absolute; bottom: -45px; right: -2px; transform: translateX(50%);
             font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff;
+            white-space: nowrap;
         }
 
-        /* Hiệu ứng gạch */
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
             background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
@@ -141,7 +140,6 @@
 
         .crossed.style-lammo { opacity: 0.2; filter: grayscale(100%); transition: all 0.5s; }
 
-        /* Chỉ báo */
         .status-indicator {
             position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6;
         }
@@ -166,6 +164,10 @@
             <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
             <label>Mỗi vạch: <input type="number" id="intervalTime" value="30" style="width:45px"> p</label>
             <label>Hiện mốc: <input type="text" id="customLabels" value="30, 60, 120"></label>
+            <select id="labelMode">
+                <option value="elapsed">Đã qua (30p)</option>
+                <option value="clock">Giờ thực (9h00)</option>
+            </select>
         </div>
         <div class="control-group">
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
@@ -225,7 +227,6 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // Cập nhật UI ngay lập tức
         const updateVisibility = () => {
             digitalClockEl.style.display = document.getElementById('checkClock').checked ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
@@ -269,12 +270,13 @@
             const duration = parseInt(document.getElementById('durationTime').value);
             const interval = parseInt(document.getElementById('intervalTime').value);
             const labelsStr = document.getElementById('customLabels').value;
+            const labelMode = document.getElementById('labelMode').value;
             const labelArray = labelsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
             
-            let [h, m] = startStr.split(':').map(Number);
-            let endTotal = h * 60 + m + duration;
-            document.getElementById('startLabel').textContent = h + 'h' + (m<10?'0'+m:m);
-            document.getElementById('endLabel').textContent = (Math.floor(endTotal/60)%24) + 'h' + (endTotal%60<10?'0'+(endTotal%60):endTotal%60);
+            let [startH, startM] = startStr.split(':').map(Number);
+            let endTotalMins = startH * 60 + startM + duration;
+            document.getElementById('startLabel').textContent = startH + 'h' + (startM<10?'0'+startM:startM);
+            document.getElementById('endLabel').textContent = (Math.floor(endTotalMins/60)%24) + 'h' + (endTotalMins%60<10?'0'+(endTotalMins%60):endTotalMins%60);
             
             totalSeconds = duration * 60;
             remainingSeconds = totalSeconds;
@@ -292,11 +294,23 @@
                 const seg = document.createElement('div');
                 seg.className = 'segment';
                 seg.innerHTML = `<div class="slash-nhieunet"></div><div class="slash-netcheo"></div>`;
+                
                 let currentMinuteTick = (i + 1) * interval;
+                
                 if (i !== numSegments - 1 && labelArray.includes(currentMinuteTick)) {
                     const label = document.createElement('div');
                     label.className = 'tick-label';
-                    label.textContent = currentMinuteTick + 'p';
+                    
+                    if (labelMode === 'elapsed') {
+                        label.textContent = currentMinuteTick + 'p';
+                    } else {
+                        // Tính giờ thực tế
+                        let tickTotalMins = startH * 60 + startM + currentMinuteTick;
+                        let tickH = Math.floor(tickTotalMins / 60) % 24;
+                        let tickM = tickTotalMins % 60;
+                        label.textContent = tickH + 'h' + (tickM < 10 ? '0' + tickM : tickM);
+                    }
+                    
                     seg.appendChild(label);
                 }
                 timelineEl.appendChild(seg);
