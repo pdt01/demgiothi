@@ -87,7 +87,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Vùng chứa các loại đồng hồ */
         .clocks-wrapper {
             display: flex;
             align-items: center;
@@ -97,12 +96,12 @@
 
         /* Đồng hồ kim */
         .analog-clock {
-            width: 130px;
-            height: 130px;
+            width: 160px; /* Tăng kích thước để chứa số */
+            height: 160px;
             border: 5px solid #fff;
             border-radius: 50%;
             position: relative;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             box-shadow: inset 0 0 15px rgba(0,0,0,0.4), 0 0 10px rgba(0,0,0,0.3);
             display: none;
         }
@@ -111,12 +110,25 @@
             background: #fff; border-radius: 50%; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 20;
         }
-        /* Các vạch chia giờ đơn giản */
-        .analog-clock::after {
-            content: ''; position: absolute; width: 2px; height: 10px; background: rgba(255,255,255,0.5);
-            top: 2px; left: calc(50% - 1px);
-            box-shadow: 0 106px 0 rgba(255,255,255,0.5);
+        
+        /* Các con số trên đồng hồ */
+        .clock-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            margin-top: -15px;
+            margin-left: -15px;
+            text-align: center;
+            line-height: 30px;
+            color: #fff;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 5;
         }
+
         .hand {
             position: absolute;
             bottom: 50%;
@@ -124,9 +136,9 @@
             background: #fff;
             border-radius: 10px;
         }
-        .hour-hand { width: 6px; height: 35px; left: calc(50% - 3px); z-index: 10; }
-        .minute-hand { width: 4px; height: 50px; left: calc(50% - 2px); background: #bdc3c7; z-index: 11; }
-        .second-hand { width: 2px; height: 60px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
+        .hour-hand { width: 6px; height: 40px; left: calc(50% - 3px); z-index: 10; }
+        .minute-hand { width: 4px; height: 60px; left: calc(50% - 2px); background: #bdc3c7; z-index: 11; }
+        .second-hand { width: 2px; height: 75px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
 
         /* Đồng hồ số */
         .digital-clock {
@@ -215,7 +227,7 @@
             </label>
         </div>
         <div class="control-group">
-            <label><input type="checkbox" id="checkAnalog"> Đồng hồ kim</label>
+            <label><input type="checkbox" id="checkAnalog" checked> Đồng hồ kim</label>
             <label><input type="checkbox" id="checkClock"> Đồng hồ số</label>
             <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
             <label><input type="checkbox" id="soundToggle" checked> Bật chuông</label>
@@ -236,7 +248,7 @@
                 <div class="hand hour-hand" id="hourHand"></div>
                 <div class="hand minute-hand" id="minuteHand"></div>
                 <div class="hand second-hand" id="secondHand"></div>
-            </div>
+                </div>
             
             <div id="digitalClock" class="digital-clock">0:00:00</div>
         </div>
@@ -257,7 +269,7 @@
 
     <div style="margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;">
         Công cụ này được phát triển bởi <b>PDT and Friends</b>.<br>
-        Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a> (Vui lòng không sử dụng cho mục đích thương mại).
+        Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a>
     </div>
 
     <script>
@@ -275,13 +287,29 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
+        // Vẽ 12 số cho đồng hồ kim
+        function drawClockNumbers() {
+            const clock = document.getElementById('analogClock');
+            // Bán kính để đặt số (Khoảng cách từ tâm ra chữ số)
+            const radius = 62; 
+            for (let i = 1; i <= 12; i++) {
+                const num = document.createElement('div');
+                num.className = 'clock-number';
+                num.textContent = i;
+                const angle = i * 30; // Mỗi số cách nhau 30 độ
+                // CSS xoay: Xoay đi -> Đẩy ra -> Xoay ngược lại để số luôn đứng thẳng
+                num.style.transform = `rotate(${angle}deg) translate(0, -${radius}px) rotate(-${angle}deg)`;
+                clock.appendChild(num);
+            }
+        }
+        drawClockNumbers();
+
         const updateVisibility = () => {
             digitalClockEl.style.display = document.getElementById('checkClock').checked ? 'block' : 'none';
             analogClockEl.style.display = document.getElementById('checkAnalog').checked ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
-        // Lắng nghe sự thay đổi UI
         document.getElementById('checkClock').addEventListener('change', updateVisibility);
         document.getElementById('checkAnalog').addEventListener('change', updateVisibility);
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
@@ -292,7 +320,6 @@
         document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
         document.getElementById('boardHeight').addEventListener('input', (e) => rootVars.setProperty('--board-min-height', e.target.value + 'px'));
 
-        // Format đếm ngược: Không có số 0 ở đầu giờ (h:mm:ss)
         function formatDigitalTime(s) {
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
@@ -373,7 +400,6 @@
         }
 
         function updateAnalogClock(remSecs) {
-            // Tính toán thời gian thực tế đang mô phỏng (Giờ bắt đầu + Thời gian đã trôi qua)
             const elapsedSecs = totalSeconds - remSecs;
             const currentSimulatedSecs = (startH * 3600) + (startM * 60) + elapsedSecs;
 
@@ -439,7 +465,6 @@
 
         function resetTimer() { applySettings(); }
         
-        // Cài đặt chiều cao ban đầu
         document.documentElement.style.setProperty('--board-min-height', document.getElementById('boardHeight').value + 'px');
         init();
     </script>
