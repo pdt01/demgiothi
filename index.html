@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đếm giờ thi</title>
+    <title>Đếm giờ thi trục số</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -19,28 +19,28 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px;
+            padding: 20px;
             margin: 0;
             min-height: 100vh;
         }
 
         .control-panel {
             background: #34495e;
-            padding: 20px 30px;
+            padding: 20px;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             z-index: 100;
         }
 
         .control-group {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
             flex-wrap: wrap;
             justify-content: center;
@@ -48,63 +48,69 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        label { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        input, select {
-            padding: 6px;
-            border-radius: 4px;
-            border: none;
-            text-align: center;
-        }
-        input[type="text"] { width: 120px; font-family: monospace; }
-        input[type="color"] { cursor: pointer; padding: 0; width: 35px; height: 35px; }
-        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        input, select { padding: 5px; border-radius: 4px; border: none; text-align: center; font-size: 14px; }
+        input[type="text"] { width: 100px; font-family: monospace; }
+        input[type="color"] { cursor: pointer; padding: 0; width: 30px; height: 30px; }
+        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
         
-        .helper-text {
-            text-align: center; font-style: italic; color: #f1c40f;
-            font-size: 13px; margin-top: -5px; margin-bottom: 5px; letter-spacing: 0.5px;
-        }
+        .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; }
 
-        .btn-group { display: flex; gap: 15px; justify-content: center; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
         button {
-            padding: 10px 25px; border: none; border-radius: 5px;
-            font-weight: bold; cursor: pointer; text-transform: uppercase;
-            transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; transition: all 0.2s;
         }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        
         #btnApply { background: #3498db; color: white; }
-        #btnApply:hover { background: #2980b9; }
         #btnStart { background: #27ae60; color: white; }
-        #btnStart:hover { background: #2ecc71; }
         #btnReset { background: #e74c3c; color: white; }
-        #btnReset:hover { background: #c0392b; }
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; }
 
-        /* Bảng phấn */
+        /* Bảng hiển thị */
         .board {
             background-color: var(--board-bg);
             border: 15px solid var(--board-border);
             border-radius: 10px;
-            padding: 120px 60px 100px 60px;
+            padding: 60px 50px;
             width: var(--board-width);
-            max-width: 1000px;
+            max-width: 1100px;
+            min-height: 300px;
             box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5);
             position: relative;
-            transition: width 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .timeline-container { position: relative; width: 100%; }
+        /* Đồng hồ đếm ngược số */
+        .digital-clock {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 6rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            margin-bottom: 40px;
+            display: none; /* Mặc định ẩn */
+        }
+
+        .timeline-container { 
+            position: relative; 
+            width: 100%; 
+            margin-top: 40px;
+            display: block; /* Mặc định hiện */
+        }
 
         .time-label {
-            position: absolute; top: -65px; font-size: 2.5rem;
-            font-family: 'Comic Sans MS', cursive, sans-serif; color: rgba(255,255,255,0.9);
+            position: absolute; top: -60px; font-size: 2.2rem;
+            font-family: 'Comic Sans MS', cursive, sans-serif; color: #fff;
         }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
-        .timeline-track {
-            position: relative; display: flex; width: 100%; height: 5px; background-color: #fff;
-        }
+        .timeline-track { position: relative; display: flex; width: 100%; height: 5px; background-color: #fff; }
         .timeline-track::after {
             content: ''; position: absolute; right: -25px; top: -10px;
             border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 25px solid #fff;
@@ -116,49 +122,39 @@
 
         .tick-label {
             position: absolute; bottom: -45px; right: -2px; transform: translateX(50%);
-            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.8rem; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff;
         }
 
-        /* Các kiểu gạch */
-        .slash-netcheo {
-            position: absolute; width: 130%; height: 5px; background-color: var(--slash-color);
-            top: 50%; left: -15%; transform: rotate(-60deg); box-shadow: 0 0 5px var(--slash-color); display: none; z-index: 10;
-        }
-        .crossed.style-netcheo .slash-netcheo { display: block; }
-        
-        .slash-daux1, .slash-daux2 {
-            position: absolute; width: 130%; height: 5px; background-color: var(--slash-color); 
-            top: 50%; left: -15%; box-shadow: 0 0 5px var(--slash-color); display: none; z-index: 10;
-        }
-        .slash-daux1 { transform: rotate(-50deg); }
-        .slash-daux2 { transform: rotate(50deg); }
-        .crossed.style-daux .slash-daux1, .crossed.style-daux .slash-daux2 { display: block; }
-
+        /* Hiệu ứng gạch */
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
             background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
-            display: none; z-index: 10; opacity: 0.9;
+            display: none; z-index: 10;
         }
         .crossed.style-nhieunet .slash-nhieunet { display: block; }
+        
+        .slash-netcheo {
+            position: absolute; width: 130%; height: 5px; background-color: var(--slash-color);
+            top: 50%; left: -15%; transform: rotate(-60deg); display: none;
+        }
+        .crossed.style-netcheo .slash-netcheo { display: block; }
+
         .crossed.style-lammo { opacity: 0.2; filter: grayscale(100%); transition: all 0.5s; }
 
-        /* Đèn báo hiệu */
+        /* Chỉ báo */
         .status-indicator {
-            position: absolute; bottom: 25px; left: 30px; display: flex; align-items: center; gap: 12px; opacity: 0.6;
+            position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6;
         }
-        .rec-dot { width: 15px; height: 15px; background-color: #e74c3c; border-radius: 50%; display: inline-block; }
-        .running .rec-dot { animation: blink 1.5s infinite ease-in-out; box-shadow: 0 0 15px #e74c3c; }
-        .chalk-icon { width: 40px; height: 12px; background-color: #eee; border-radius: 2px; transform: rotate(-15deg); }
-        .running .chalk-icon { animation: breathe 3s infinite ease-in-out; }
-        .status-text { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.2rem; color: #fff; }
+        .rec-dot { width: 12px; height: 12px; background-color: #e74c3c; border-radius: 50%; }
+        .running .rec-dot { animation: blink 1.5s infinite; box-shadow: 0 0 10px #e74c3c; }
+        .status-text { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1rem; color: #fff; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-        @keyframes breathe { 0%, 100% { transform: rotate(-15deg) scale(1); opacity: 0.8; } 50% { transform: rotate(-10deg) scale(1.1); opacity: 1; } }
 
         .time-up {
             display: none; position: absolute; bottom: 30px; right: 40px;
             font-size: 4rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif;
-            transform: rotate(-5deg); z-index: 20;
+            transform: rotate(-5deg); z-index: 50;
         }
     </style>
 </head>
@@ -167,29 +163,30 @@
     <div class="control-panel">
         <div class="control-group">
             <label>Bắt đầu: <input type="time" id="startTime" value="08:30"></label>
-            <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:60px"> p</label>
-            <label>Mỗi vạch: <input type="number" id="intervalTime" value="30" style="width:50px"> p</label>
-            <label>Hiện mốc: <input type="text" id="customLabels" value="30, 60, 120" placeholder="VD: 30, 60"></label>
+            <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
+            <label>Mỗi vạch: <input type="number" id="intervalTime" value="30" style="width:45px"> p</label>
+            <label>Hiện mốc: <input type="text" id="customLabels" value="30, 60, 120"></label>
         </div>
         <div class="control-group">
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
             <label>Màu viền: <input type="color" id="borderColor" value="#8b5a2b"></label>
             <label>Màu gạch: <input type="color" id="slashColor" value="#e74c3c"></label>
-            <label>Cỡ bảng: <input type="range" id="boardWidth" min="60" max="100" value="85"></label>
-            <label>Kiểu: 
+            <label>Cỡ bảng: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
+            <label>Gạch: 
                 <select id="slashStyle">
-                    <option value="style-nhieunet">Nhiều nét song song</option>
+                    <option value="style-nhieunet">Nhiều nét</option>
                     <option value="style-netcheo">1 Nét chéo</option>
-                    <option value="style-daux">Dấu X</option>
                     <option value="style-lammo">Xóa mờ</option>
                 </select>
             </label>
-            <label style="color: #2ecc71; margin-left: 10px;">
-                <input type="checkbox" id="soundToggle" checked> Bật chuông báo
-            </label>
+        </div>
+        <div class="control-group">
+            <label><input type="checkbox" id="checkClock"> Hiện đồng hồ số</label>
+            <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
+            <label><input type="checkbox" id="soundToggle" checked> Bật chuông</label>
         </div>
         
-        <div class="helper-text">* Vui lòng nhấn "Áp dụng" sau khi thay đổi thông số thời gian để cập nhật trục số.</div>
+        <div class="helper-text">* Nhấn "Áp dụng" sau khi thay đổi thông số thời gian.</div>
         
         <div class="btn-group">
             <button id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
@@ -199,7 +196,9 @@
     </div>
 
     <div class="board" id="mainBoard">
-        <div class="timeline-container">
+        <div id="digitalClock" class="digital-clock">00:00:00</div>
+
+        <div id="timelineContainer" class="timeline-container">
             <div class="time-label start-label" id="startLabel">8h30</div>
             <div class="timeline-track" id="timeline"></div>
             <div class="time-label end-label" id="endLabel">11h00</div>
@@ -207,8 +206,7 @@
 
         <div class="status-indicator" id="statusArea">
             <span class="rec-dot"></span>
-            <div class="chalk-icon"></div>
-            <span class="status-text" id="statusText">PHÒNG THI</span>
+            <span class="status-text" id="statusText">SẴN SÀNG</span>
         </div>
 
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
@@ -222,71 +220,48 @@
         
         const timelineEl = document.getElementById('timeline');
         const boardEl = document.getElementById('mainBoard');
+        const digitalClockEl = document.getElementById('digitalClock');
+        const timelineContainerEl = document.getElementById('timelineContainer');
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
+        // Cập nhật UI ngay lập tức
+        const updateVisibility = () => {
+            digitalClockEl.style.display = document.getElementById('checkClock').checked ? 'block' : 'none';
+            timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
+        };
+
+        document.getElementById('checkClock').addEventListener('change', updateVisibility);
+        document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
         document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
 
-        // THUẬT TOÁN TẠO CHUÔNG ĐIỆN TRƯỜNG HỌC
+        function formatTime(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+        }
+
         function playAlarm() {
             if (!document.getElementById('soundToggle').checked) return;
-            
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const duration = 3.0; // Chuông kéo dài 3 giây
             const t = audioCtx.currentTime;
-
-            // 1. Tạo 2 âm thanh chói (square wave) lệch tần số để tạo độ vang kim loại
-            const osc1 = audioCtx.createOscillator();
-            osc1.type = 'square';
-            osc1.frequency.value = 750; // Tần số 1
-
-            const osc2 = audioCtx.createOscillator();
-            osc2.type = 'square';
-            osc2.frequency.value = 1000; // Tần số 2
-
-            // 2. Tạo hiệu ứng búa gõ liên tục (Tremolo/LFO)
-            const lfo = audioCtx.createOscillator();
-            lfo.type = 'sine';
-            lfo.frequency.value = 35; // Gõ 35 lần mỗi giây
-
-            const lfoGain = audioCtx.createGain();
-            lfoGain.gain.value = 1; // Độ mạnh của búa gõ
-
-            // 3. Điều khiển âm lượng tổng (Fade in nhanh, giữ nguyên, rồi Fade out dần)
-            const mainGain = audioCtx.createGain();
-            mainGain.gain.setValueAtTime(0, t);
-            mainGain.gain.linearRampToValueAtTime(0.25, t + 0.1); // Bật tiếng
-            mainGain.gain.setValueAtTime(0.25, t + duration - 1); // Kéo dài tiếng
-            mainGain.gain.exponentialRampToValueAtTime(0.001, t + duration); // Tắt dần
-
-            // Kết nối sơ đồ âm thanh: LFO -> lfoGain -> Âm lượng chính của osc1/osc2
-            lfo.connect(lfoGain);
-            
-            const vca = audioCtx.createGain();
-            vca.gain.value = 0;
-            lfoGain.connect(vca.gain);
-            // Đặt base gain để tiếng không bị cắt hẳn
-            vca.gain.setValueAtTime(0.5, t); 
-
-            osc1.connect(vca);
-            osc2.connect(vca);
-            vca.connect(mainGain);
-            mainGain.connect(audioCtx.destination);
-
-            // Bắt đầu phát
-            osc1.start(t);
-            osc2.start(t);
-            lfo.start(t);
-
-            // Dừng phát
-            osc1.stop(t + duration);
-            osc2.stop(t + duration);
-            lfo.stop(t + duration);
+            const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
+            const osc2 = audioCtx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 1000;
+            const lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 35;
+            const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 1;
+            const mainGain = audioCtx.createGain(); mainGain.gain.setValueAtTime(0, t);
+            mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); mainGain.gain.setValueAtTime(0.2, t + 2.5);
+            mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
+            const vca = audioCtx.createGain(); vca.gain.value = 0.5;
+            lfo.connect(lfoGain); lfoGain.connect(vca.gain);
+            osc1.connect(vca); osc2.connect(vca); vca.connect(mainGain); mainGain.connect(audioCtx.destination);
+            osc1.start(t); osc2.start(t); lfo.start(t);
+            osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
         }
 
         function init() {
@@ -294,7 +269,6 @@
             const duration = parseInt(document.getElementById('durationTime').value);
             const interval = parseInt(document.getElementById('intervalTime').value);
             const labelsStr = document.getElementById('customLabels').value;
-            
             const labelArray = labelsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
             
             let [h, m] = startStr.split(':').map(Number);
@@ -306,6 +280,7 @@
             remainingSeconds = totalSeconds;
             segmentDurationSeconds = interval * 60;
             
+            digitalClockEl.textContent = formatTime(remainingSeconds);
             timelineEl.innerHTML = '';
             document.getElementById('timeUpMsg').style.display = 'none';
             boardEl.classList.remove('running');
@@ -316,14 +291,7 @@
             for(let i = 0; i < numSegments; i++) {
                 const seg = document.createElement('div');
                 seg.className = 'segment';
-                
-                seg.innerHTML = `
-                    <div class="slash-nhieunet"></div>
-                    <div class="slash-netcheo"></div>
-                    <div class="slash-daux1"></div>
-                    <div class="slash-daux2"></div>
-                `;
-
+                seg.innerHTML = `<div class="slash-nhieunet"></div><div class="slash-netcheo"></div>`;
                 let currentMinuteTick = (i + 1) * interval;
                 if (i !== numSegments - 1 && labelArray.includes(currentMinuteTick)) {
                     const label = document.createElement('div');
@@ -333,18 +301,17 @@
                 }
                 timelineEl.appendChild(seg);
             }
+            updateVisibility();
         }
 
         function update() {
+            digitalClockEl.textContent = formatTime(remainingSeconds);
             const elapsed = totalSeconds - remainingSeconds;
             const crossed = Math.floor(elapsed / segmentDurationSeconds);
-            const selectedStyle = document.getElementById('slashStyle').value;
-
+            const style = document.getElementById('slashStyle').value;
             if (crossed > currentCrossedCount) {
                 const segs = document.querySelectorAll('.segment');
-                for (let i = currentCrossedCount; i < crossed; i++) {
-                    if(segs[i]) segs[i].classList.add('crossed', selectedStyle);
-                }
+                for (let i = currentCrossedCount; i < crossed; i++) if(segs[i]) segs[i].classList.add('crossed', style);
                 currentCrossedCount = crossed;
             }
         }
@@ -353,15 +320,12 @@
             clearInterval(timerInterval);
             isRunning = false;
             document.getElementById('btnStart').disabled = false;
-            document.getElementById('slashStyle').disabled = false;
             init();
         }
 
         function startTimer() {
             if (isRunning) return;
             if (remainingSeconds <= 0) init();
-            
-            // Yêu cầu quyền phát âm thanh từ trình duyệt khi ấn nút Bắt đầu
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -369,7 +333,6 @@
             boardEl.classList.add('running');
             statusText.textContent = "ĐANG THI...";
             document.getElementById('btnStart').disabled = true;
-            document.getElementById('slashStyle').disabled = true;
 
             timerInterval = setInterval(() => {
                 remainingSeconds--;
@@ -380,18 +343,13 @@
                     boardEl.classList.remove('running');
                     statusText.textContent = "HOÀN THÀNH";
                     document.getElementById('btnStart').disabled = false;
-                    document.getElementById('slashStyle').disabled = false;
                     document.getElementById('timeUpMsg').style.display = 'block';
-                    
-                    playAlarm(); // Kích hoạt chuông điện
+                    playAlarm();
                 }
             }, 1000);
         }
 
-        function resetTimer() {
-            applySettings();
-        }
-
+        function resetTimer() { applySettings(); }
         init();
     </script>
 </body>
