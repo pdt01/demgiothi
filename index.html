@@ -50,12 +50,15 @@
         }
 
         label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        input, select { padding: 5px; border-radius: 4px; border: none; text-align: center; font-size: 14px; }
+        input[type="time"], input[type="number"], select { padding: 5px; border-radius: 4px; border: none; text-align: center; font-size: 14px; }
         input[type="text"] { width: 100px; font-family: monospace; }
         input[type="color"] { cursor: pointer; padding: 0; width: 30px; height: 30px; }
-        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; cursor: pointer; margin: 0; }
         input[type="range"] { width: 80px; }
         
+        .radio-group { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px; }
+        .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 5px; }
+
         .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; }
 
         .btn-group { display: flex; gap: 10px; justify-content: center; }
@@ -94,7 +97,7 @@
             margin-bottom: 40px;
         }
 
-        /* Đồng hồ kim - ĐÃ LÀM TO HƠN (220px) */
+        /* Đồng hồ kim */
         .analog-clock {
             width: 220px; 
             height: 220px;
@@ -200,8 +203,13 @@
             <label>Độ cao: <input type="range" id="boardHeight" min="250" max="700" value="350"></label>
         </div>
         <div class="control-group">
-            <label><input type="checkbox" id="checkAnalog" checked> Đồng hồ kim</label>
-            <label><input type="checkbox" id="checkClock"> Đồng hồ số</label>
+            <div class="radio-group">
+                <span style="font-size: 13px; font-weight: bold;">Đồng hồ:</span>
+                <label><input type="radio" name="clockType" value="analog" checked> Kim</label>
+                <label><input type="radio" name="clockType" value="digital"> Số</label>
+                <label><input type="radio" name="clockType" value="none"> Ẩn</label>
+            </div>
+            <div class="divider"></div>
             <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
             <label><input type="checkbox" id="soundToggle" checked> Bật âm thanh</label>
         </div>
@@ -261,7 +269,7 @@
 
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
-            const radius = 85; // Tăng bán kính đặt số cho đồng hồ to
+            const radius = 85; 
             for (let i = 1; i <= 12; i++) {
                 const num = document.createElement('div');
                 num.className = 'clock-number';
@@ -273,33 +281,23 @@
         }
         drawClockNumbers();
 
-        // --- LOGIC ĐỘC QUYỀN ĐỒNG HỒ ---
-        const checkAnalog = document.getElementById('checkAnalog');
-        const checkClock = document.getElementById('checkClock');
-
-        const updateVisibility = (e) => {
-            if (checkAnalog.checked && checkClock.checked) {
-                // Nếu người dùng vừa nhấn vào checkClock khi checkAnalog đang bật
-                if (e.target.id === 'checkClock') {
-                    checkClock.checked = false;
-                    alert("Bạn phải tắt đồng hồ kim trước khi bật đồng hồ số!");
-                } 
-                // Ngược lại
-                else {
-                    checkAnalog.checked = false;
-                    alert("Bạn phải tắt đồng hồ số trước khi bật đồng hồ kim!");
-                }
-            }
+        // LOGIC RADIO MỚI XỬ LÝ HIỂN THỊ
+        const updateVisibility = () => {
+            const clockType = document.querySelector('input[name="clockType"]:checked').value;
             
-            digitalClockEl.style.display = checkClock.checked ? 'block' : 'none';
-            analogClockEl.style.display = checkAnalog.checked ? 'block' : 'none';
+            digitalClockEl.style.display = (clockType === 'digital') ? 'block' : 'none';
+            analogClockEl.style.display = (clockType === 'analog') ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
-        checkAnalog.addEventListener('change', updateVisibility);
-        checkClock.addEventListener('change', updateVisibility);
+        // Lắng nghe thay đổi trên tất cả các nút radio
+        document.querySelectorAll('input[name="clockType"]').forEach(radio => {
+            radio.addEventListener('change', updateVisibility);
+        });
+        
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
         
+        // Thay đổi CSS biến realtime
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
@@ -394,7 +392,7 @@
                 }
                 timelineEl.appendChild(seg);
             }
-            updateVisibility({target: {id: 'none'}});
+            updateVisibility();
         }
 
         function updateAnalogClock(remSecs) {
