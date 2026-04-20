@@ -281,23 +281,18 @@
         }
         drawClockNumbers();
 
-        // LOGIC RADIO MỚI XỬ LÝ HIỂN THỊ
         const updateVisibility = () => {
             const clockType = document.querySelector('input[name="clockType"]:checked').value;
-            
             digitalClockEl.style.display = (clockType === 'digital') ? 'block' : 'none';
             analogClockEl.style.display = (clockType === 'analog') ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
-        // Lắng nghe thay đổi trên tất cả các nút radio
         document.querySelectorAll('input[name="clockType"]').forEach(radio => {
             radio.addEventListener('change', updateVisibility);
         });
-        
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
         
-        // Thay đổi CSS biến realtime
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
         document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
         document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
@@ -416,7 +411,13 @@
             }
         }
 
+        // HÀM ÁP DỤNG CÓ THÊM CẢNH BÁO
         function applySettings() {
+            if (isRunning) {
+                const confirmReset = confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?");
+                if (!confirmReset) return; // Nếu chọn Cancel thì ngừng lại, tiếp tục đếm
+            }
+            
             clearInterval(timerInterval);
             isRunning = false;
             document.getElementById('btnStart').disabled = false;
