@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồng Hồ</title>
+    <title>Đồng Hồ Học Tập - PDT and Friends</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -23,7 +23,6 @@
             min-height: 100vh;
         }
 
-        /* Lớp dùng chung để ẩn các thành phần UI */
         .hidden {
             display: none !important;
         }
@@ -88,7 +87,8 @@
 
         /* Bảng phấn */
         .board {
-            background-color: var(--board-bg);
+            /* Vá lỗi nền đen trên Samsung Internet */
+            background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
             border: 15px solid var(--board-border);
             border-radius: 10px;
             width: 85%;
@@ -100,10 +100,42 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            margin: auto 0; /* Giúp căn giữa khi ẩn bảng điều khiển */
+            margin: auto 0;
+            transition: all 0.3s ease;
         }
 
-        /* Nút tùy chỉnh nằm trong góc bảng */
+        /* CHẾ ĐỘ TỐI GIẢN (Ẩn nền & viền) */
+        .board.minimal {
+            background-color: transparent !important;
+            background-image: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Nút ẩn nền bảng (Góc trái) */
+        .board-style-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.2rem;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: 0.3s;
+            z-index: 50;
+            outline: none;
+            text-transform: none;
+        }
+        .board-style-btn:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Nút tùy chỉnh (Góc phải) */
         .board-controls {
             position: absolute;
             top: 15px;
@@ -112,7 +144,6 @@
             gap: 8px;
             z-index: 50;
         }
-
         .board-controls button {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
@@ -124,7 +155,7 @@
             opacity: 0.3;
             transition: 0.3s;
             outline: none;
-            text-transform: none; /* Tránh bị ảnh hưởng bởi button ở trên */
+            text-transform: none;
         }
         .board-controls button:hover {
             opacity: 1;
@@ -150,6 +181,7 @@
             .board { min-height: 250px; }
             .board-controls { top: 10px; right: 10px; }
             .board-controls button { padding: 4px 6px; font-size: 1rem; }
+            .board-style-btn { top: 10px; left: 10px; padding: 4px 6px; font-size: 1rem; }
         }
     </style>
 </head>
@@ -177,7 +209,9 @@
         </div>
     </div>
 
-    <div class="board">
+    <div class="board" id="mainBoard">
+        <button id="btnToggleBoard" class="board-style-btn" title="Ẩn nền và viền bảng">☒</button>
+
         <div class="board-controls">
             <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
             <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
@@ -185,7 +219,7 @@
 
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
         <div id="clockDisplay" class="digital-clock">00:00:00</div>
-        </div>
+    </div>
 
     <script>
         let mode = 'realtime';
@@ -203,6 +237,8 @@
         // --- XỬ LÝ ẨN/HIỆN GIAO DIỆN VÀ TOÀN MÀN HÌNH ---
         const navBar = document.getElementById('navBar');
         const controlPanel = document.getElementById('controlPanel');
+        const boardEl = document.getElementById('mainBoard');
+        const btnToggleBoard = document.getElementById('btnToggleBoard');
 
         document.getElementById('btnToggleUI').addEventListener('click', () => {
             navBar.classList.toggle('hidden');
@@ -219,6 +255,17 @@
             }
         });
 
+        // Xử lý bật/tắt chế độ tối giản (Ẩn nền bảng)
+        btnToggleBoard.addEventListener('click', () => {
+            boardEl.classList.toggle('minimal');
+            if (boardEl.classList.contains('minimal')) {
+                btnToggleBoard.textContent = '☐';
+                btnToggleBoard.title = "Hiện nền và viền bảng";
+            } else {
+                btnToggleBoard.textContent = '☒';
+                btnToggleBoard.title = "Ẩn nền và viền bảng";
+            }
+        });
 
         // --- LẮNG NGHE THAY ĐỔI CHẾ ĐỘ ---
         document.querySelectorAll('input[name="mode"]').forEach(radio => {
@@ -237,12 +284,10 @@
             });
         });
 
-        // --- HÀM FORMAT THỜI GIAN ĐÃ XÓA SỐ 0 Ở ĐẦU TIẾNG ---
         function formatTime(s) {
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
             const sec = s % 60;
-            // Nếu có giờ, in ra h:mm:ss. Nếu không có giờ, in ra mm:ss.
             if (h > 0) return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
@@ -251,11 +296,10 @@
             clockDisplay.textContent = formatTime(s);
         }
 
-        // --- CHẾ ĐỘ THỜI GIAN THỰC ---
         function startRealtime() {
             const updateRealtime = () => {
                 const now = new Date();
-                const h = now.getHours(); // Không dùng padStart để bỏ số 0 ở đầu
+                const h = now.getHours();
                 const m = now.getMinutes().toString().padStart(2,'0');
                 const s = now.getSeconds().toString().padStart(2,'0');
                 clockDisplay.textContent = `${h}:${m}:${s}`;
@@ -265,7 +309,6 @@
             document.getElementById('timeUpMsg').style.display = 'none';
         }
 
-        // --- CHẾ ĐỘ ĐẾM NGƯỢC ---
         function startCountdown() {
             if (isRunning && !isPaused) return;
             
@@ -316,7 +359,6 @@
             updateDisplay(totalSeconds);
         }
 
-        // --- CHUÔNG BÁO ---
         function playAlarm() {
             const t = audioCtx.currentTime;
             const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
@@ -333,7 +375,6 @@
             osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
         }
 
-        // --- CẢNH BÁO KHI TẢI LẠI TRANG (F5) NẾU ĐANG ĐẾM NGƯỢC ---
         window.addEventListener('beforeunload', function (e) {
             if (isRunning) {
                 e.preventDefault(); 
@@ -341,7 +382,6 @@
             }
         });
 
-        // Khởi chạy mặc định
         startRealtime();
     </script>
 </body>
