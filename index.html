@@ -20,9 +20,36 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Hỗ trợ căn giữa dọc khi ẩn menu */
             padding: 20px;
             margin: 0;
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Nút điều khiển nổi ở góc phải */
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 200;
+        }
+        .top-controls button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            outline: none;
+        }
+        .top-controls button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
         }
 
         .control-panel {
@@ -37,6 +64,12 @@
             width: 100%;
             max-width: 1050px;
             z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        /* Lớp dùng để ẩn bảng điều khiển */
+        .control-panel.hidden {
+            display: none !important;
         }
 
         .control-group {
@@ -62,7 +95,7 @@
         .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; }
 
         .btn-group { display: flex; gap: 10px; justify-content: center; }
-        button {
+        .btn-panel {
             padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; 
             cursor: pointer; text-transform: uppercase; transition: all 0.2s;
         }
@@ -88,6 +121,7 @@
             align-items: center;
             overflow: hidden;
             transition: all 0.3s ease;
+            margin: auto 0; /* Giúp căn giữa mượt mà */
         }
 
         .clocks-wrapper {
@@ -180,11 +214,23 @@
             font-size: 4rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif;
             transform: rotate(-5deg); z-index: 50;
         }
+        
+        .footer-copyleft {
+            margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;
+        }
+        .control-panel.hidden ~ .footer-copyleft {
+            display: none; /* Ẩn luôn footer khi ẩn menu để full màn hình thật sạch */
+        }
     </style>
 </head>
 <body>
 
-    <div class="control-panel">
+    <div class="top-controls">
+        <button id="btnToggleSettings" title="Bật/Tắt Cài đặt">⚙️</button>
+        <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
+    </div>
+
+    <div class="control-panel" id="controlPanel">
         <div class="control-group">
             <label>Bắt đầu: <input type="time" id="startTime" value="08:30"></label>
             <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
@@ -217,9 +263,9 @@
         <div class="helper-text">* Nhấn "Áp dụng" sau khi thay đổi thông số thời gian.</div>
         
         <div class="btn-group">
-            <button id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
-            <button id="btnStart" onclick="startTimer()">▶ Bắt Đầu</button>
-            <button id="btnReset" onclick="resetTimer()">⏹ Đặt Lại</button>
+            <button class="btn-panel" id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
+            <button class="btn-panel" id="btnStart" onclick="startTimer()">▶ Bắt Đầu</button>
+            <button class="btn-panel" id="btnReset" onclick="resetTimer()">⏹ Đặt Lại</button>
         </div>
     </div>
 
@@ -247,7 +293,7 @@
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
     </div>
 
-    <div style="margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;">
+    <div class="footer-copyleft">
         Công cụ này được phát triển bởi <b>PDT and Friends</b>.<br>
         Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a>
     </div>
@@ -267,6 +313,22 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
+        // --- XỬ LÝ NÚT CÀI ĐẶT & TOÀN MÀN HÌNH ---
+        document.getElementById('btnToggleSettings').addEventListener('click', () => {
+            document.getElementById('controlPanel').classList.toggle('hidden');
+        });
+
+        document.getElementById('btnFullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Trình duyệt của bạn không hỗ trợ toàn màn hình: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Vẽ 12 số cho đồng hồ kim
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
             const radius = 85; 
@@ -411,13 +473,11 @@
             }
         }
 
-        // HÀM ÁP DỤNG CÓ THÊM CẢNH BÁO
         function applySettings() {
             if (isRunning) {
                 const confirmReset = confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?");
-                if (!confirmReset) return; // Nếu chọn Cancel thì ngừng lại, tiếp tục đếm
+                if (!confirmReset) return; 
             }
-            
             clearInterval(timerInterval);
             isRunning = false;
             document.getElementById('btnStart').disabled = false;
