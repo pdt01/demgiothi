@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồng Hồ</title>
+    <title>Đồng Hồ Học Tập - PDT and Friends</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -87,7 +87,6 @@
 
         /* Bảng phấn */
         .board {
-            /* Vá lỗi nền đen trên Samsung Internet */
             background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
             border: 15px solid var(--board-border);
             border-radius: 10px;
@@ -101,10 +100,11 @@
             align-items: center;
             position: relative;
             margin: auto 0;
-            transition: all 0.3s ease;
+            /* Thêm transition cho transform để scale mượt mà */
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform-origin: center center;
         }
 
-        /* CHẾ ĐỘ TỐI GIẢN (Ẩn nền & viền) */
         .board.minimal {
             background-color: transparent !important;
             background-image: none !important;
@@ -112,25 +112,31 @@
             box-shadow: none !important;
         }
 
-        /* Nút ẩn nền bảng (Góc trái) */
-        .board-style-btn {
+        /* Nút ẩn nền & Zoom (Góc trái) */
+        .board-left-controls {
             position: absolute;
             top: 15px;
             left: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+        .board-left-controls button {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
             color: white;
             font-size: 1.2rem;
-            padding: 5px 8px;
+            padding: 5px 10px; /* Tăng padding xíu cho dễ bấm */
             border-radius: 5px;
             cursor: pointer;
             opacity: 0.3;
             transition: 0.3s;
-            z-index: 50;
             outline: none;
             text-transform: none;
+            font-family: monospace; /* Font cho dấu + - rõ ràng */
+            font-weight: bold;
         }
-        .board-style-btn:hover {
+        .board-left-controls button:hover {
             opacity: 1;
             background: rgba(255,255,255,0.1);
         }
@@ -176,12 +182,17 @@
             transform: rotate(-5deg); z-index: 50; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
         }
 
+        .footer-copyleft {
+            margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;
+        }
+
         @media (max-width: 600px) {
             .digital-clock { font-size: 5rem; }
-            .board { min-height: 250px; }
+            .board { min-height: 250px; width: 90%; }
             .board-controls { top: 10px; right: 10px; }
             .board-controls button { padding: 4px 6px; font-size: 1rem; }
-            .board-style-btn { top: 10px; left: 10px; padding: 4px 6px; font-size: 1rem; }
+            .board-left-controls { top: 10px; left: 10px; }
+            .board-left-controls button { padding: 4px 8px; font-size: 1rem; }
         }
     </style>
 </head>
@@ -210,7 +221,11 @@
     </div>
 
     <div class="board" id="mainBoard">
-        <button id="btnToggleBoard" class="board-style-btn" title="Ẩn nền và viền bảng">☒</button>
+        <div class="board-left-controls">
+            <button id="btnToggleBoard" title="Ẩn nền và viền bảng">☒</button>
+            <button id="btnZoomOut" title="Thu nhỏ bảng">-</button>
+            <button id="btnZoomIn" title="Phóng to bảng">+</button>
+        </div>
 
         <div class="board-controls">
             <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
@@ -220,6 +235,11 @@
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
         <div id="clockDisplay" class="digital-clock">00:00:00</div>
     </div>
+    
+    <div class="footer-copyleft" id="footerCopy">
+        Công cụ này được phát triển bởi <a href="https://www.facebook.com/link-facebook-cua-ban" target="_blank" style="color: #f1c40f; text-decoration: none; font-weight: bold;">PDT and Friends</a>.<br>
+        Được phân phối dưới giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC-SA 4.0</a>
+    </div>
 
     <script>
         let mode = 'realtime';
@@ -228,6 +248,7 @@
         let isPaused = false;
         let totalSeconds = 0;
         let audioCtx;
+        let currentScale = 1; // Biến lưu tỷ lệ phóng to/thu nhỏ
 
         const clockDisplay = document.getElementById('clockDisplay');
         const countdownControls = document.getElementById('countdownControls');
@@ -239,10 +260,12 @@
         const controlPanel = document.getElementById('controlPanel');
         const boardEl = document.getElementById('mainBoard');
         const btnToggleBoard = document.getElementById('btnToggleBoard');
+        const footerCopy = document.getElementById('footerCopy');
 
         document.getElementById('btnToggleUI').addEventListener('click', () => {
             navBar.classList.toggle('hidden');
             controlPanel.classList.toggle('hidden');
+            footerCopy.classList.toggle('hidden'); // Ẩn luôn footer cho gọn
         });
 
         document.getElementById('btnFullscreen').addEventListener('click', () => {
@@ -255,7 +278,7 @@
             }
         });
 
-        // Xử lý bật/tắt chế độ tối giản (Ẩn nền bảng)
+        // Chế độ tối giản (Ẩn nền bảng)
         btnToggleBoard.addEventListener('click', () => {
             boardEl.classList.toggle('minimal');
             if (boardEl.classList.contains('minimal')) {
@@ -264,6 +287,21 @@
             } else {
                 btnToggleBoard.textContent = '☒';
                 btnToggleBoard.title = "Ẩn nền và viền bảng";
+            }
+        });
+
+        // --- XỬ LÝ ZOOM BẢNG ---
+        document.getElementById('btnZoomIn').addEventListener('click', () => {
+            if (currentScale < 2.5) { // Giới hạn phóng to tối đa 2.5 lần
+                currentScale += 0.1;
+                boardEl.style.transform = `scale(${currentScale})`;
+            }
+        });
+
+        document.getElementById('btnZoomOut').addEventListener('click', () => {
+            if (currentScale > 0.4) { // Giới hạn thu nhỏ tối thiểu 0.4 lần
+                currentScale -= 0.1;
+                boardEl.style.transform = `scale(${currentScale})`;
             }
         });
 
