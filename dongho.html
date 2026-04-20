@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồng Hồ Học Tập - PDT and Friends</title>
+    <title>Đồng Hồ</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -26,7 +26,7 @@
 
         .hidden { display: none !important; }
 
-        /* --- BONG BÓNG MENU --- */
+        /* --- BONG BÓNG MENU TỐI ƯU --- */
         .floating-bubble {
             position: fixed;
             top: 20px;
@@ -43,10 +43,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             user-select: none;
             touch-action: none; 
-        }
-
-        .floating-bubble:not(.dragging) .bubble-actions {
-            transition: width 0.3s ease, opacity 0.3s ease;
+            transition: background 0.3s ease;
         }
 
         .drag-handle {
@@ -76,6 +73,7 @@
             transition: background 0.2s, transform 0.2s;
             outline: none;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .floating-bubble button:hover {
             background: rgba(255,255,255,0.3);
@@ -86,65 +84,35 @@
             display: flex;
             gap: 8px;
             overflow: hidden;
-            width: 228px; /* Độ rộng cho 5 nút */
-            opacity: 1;
+            max-width: 250px; /* Độ rộng chứa 5 nút */
+            transition: max-width 0.3s ease, opacity 0.3s ease;
         }
         
         .floating-bubble.collapsed .bubble-actions {
-            width: 0;
+            max-width: 0;
             opacity: 0;
             pointer-events: none;
         }
 
-        .svg-icon {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
+        .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* Thanh điều hướng */
         .nav-bar {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 200;
+            position: absolute; top: 20px; left: 20px;
+            display: flex; gap: 10px; z-index: 200;
         }
         .nav-bar a {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            transition: 0.3s;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; transition: 0.3s;
         }
         .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.3); }
 
         .control-panel {
-            background: #34495e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 600px;
-            z-index: 100;
-            margin-top: 50px;
+            background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 600px; z-index: 100; margin-top: 50px;
         }
 
-        .control-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
+        .control-group { display: flex; gap: 15px; align-items: center; justify-content: center; }
         input[type="number"] { padding: 8px; border-radius: 4px; border: none; text-align: center; font-size: 16px; width: 80px; }
         .radio-group { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 20px; border-radius: 20px; }
 
@@ -159,46 +127,19 @@
         /* Bảng phấn */
         .board {
             background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
-            border: 15px solid var(--board-border);
-            border-radius: 10px;
-            width: 85%;
-            max-width: 800px;
-            min-height: 400px;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            margin: auto 0;
+            border: 15px solid var(--board-border); border-radius: 10px; width: 85%; max-width: 800px; min-height: 400px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin: auto 0;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform-origin: center center;
         }
 
-        /* Ẩn board để dùng transform logic zoom bằng inline style JS */
+        .board.minimal { background-color: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; }
 
-        .board.minimal {
-            background-color: transparent !important;
-            background-image: none !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-        }
+        .digital-clock { font-family: 'Courier New', Courier, monospace; font-size: 10rem; font-weight: bold; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.4); }
 
-        .digital-clock {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 10rem;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.4);
-        }
+        .time-up { display: none; position: absolute; top: 20px; font-size: 3rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif; transform: rotate(-5deg); z-index: 50; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
 
-        .time-up {
-            display: none; position: absolute; top: 20px;
-            font-size: 3rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif;
-            transform: rotate(-5deg); z-index: 50; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-        }
-
-        .footer-copyleft {
-            margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;
-        }
+        .footer-copyleft { margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5; }
 
         @media (max-width: 600px) {
             .digital-clock { font-size: 5rem; }
@@ -212,11 +153,9 @@
         <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
             <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
         </div>
-        
         <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
-        
         <div class="bubble-actions" id="bubbleActions">
-            <button id="btnToggleBoard" title="Ẩn nền và viền bảng">
+            <button id="btnToggleBoard" title="Ẩn/Hiện nền bảng">
                 <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
             </button>
             <button id="btnZoomOut" title="Thu nhỏ bảng">
@@ -267,14 +206,13 @@
     </div>
 
     <script>
-        // --- LOGIC KÉO THẢ MƯỢT ---
+        // --- LOGIC KÉO THẢ TỐI ƯU ---
         const floatingMenu = document.getElementById('floatingMenu');
         const dragHandle = document.getElementById('dragHandle');
         const btnCollapseBubble = document.getElementById('btnCollapseBubble');
         
         let isDragging = false;
-        let currentX, currentY, initialX, initialY;
-        let xOffset = 0, yOffset = 0;
+        let dragStartX, dragStartY;
 
         btnCollapseBubble.addEventListener('click', () => {
             floatingMenu.classList.toggle('collapsed');
@@ -282,52 +220,56 @@
         });
 
         function dragStart(e) {
-            if (e.type === "touchstart") {
-                initialX = e.touches[0].clientX - xOffset;
-                initialY = e.touches[0].clientY - yOffset;
-            } else {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
-            }
             if (e.target === dragHandle || dragHandle.contains(e.target)) {
                 isDragging = true;
-                floatingMenu.classList.add('dragging');
+                if (e.type === "touchstart") {
+                    dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY;
+                } else {
+                    dragStartX = e.clientX; dragStartY = e.clientY;
+                }
             }
-        }
-
-        function dragEnd() {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-            floatingMenu.classList.remove('dragging');
         }
 
         function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                if (e.type === "touchmove") {
-                    currentX = e.touches[0].clientX - initialX;
-                    currentY = e.touches[0].clientY - initialY;
-                } else {
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
-                }
-                xOffset = currentX;
-                yOffset = currentY;
-                
-                requestAnimationFrame(() => {
-                    floatingMenu.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-                });
+            if (!isDragging) return;
+            e.preventDefault();
+            let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+            let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+            let dx = clientX - dragStartX; let dy = clientY - dragStartY;
+            
+            requestAnimationFrame(() => {
+                floatingMenu.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+            });
+        }
+
+        function dragEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const rect = floatingMenu.getBoundingClientRect();
+            floatingMenu.style.transform = 'none'; 
+            
+            const maxY = window.innerHeight - rect.height;
+            floatingMenu.style.top = Math.max(0, Math.min(rect.top, maxY)) + 'px';
+            
+            // NEO THÔNG MINH (Trái/Phải)
+            if (rect.left + rect.width / 2 > window.innerWidth / 2) {
+                const rightDist = window.innerWidth - rect.right;
+                floatingMenu.style.left = 'auto';
+                floatingMenu.style.right = Math.max(0, rightDist) + 'px';
+            } else {
+                floatingMenu.style.right = 'auto';
+                floatingMenu.style.left = Math.max(0, rect.left) + 'px';
             }
         }
 
         floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
-        floatingMenu.addEventListener("touchend", dragEnd, { passive: false });
-        floatingMenu.addEventListener("touchmove", drag, { passive: false });
+        document.addEventListener("touchmove", drag, { passive: false });
+        document.addEventListener("touchend", dragEnd);
 
         floatingMenu.addEventListener("mousedown", dragStart);
-        document.addEventListener("mouseup", dragEnd);
         document.addEventListener("mousemove", drag);
+        document.addEventListener("mouseup", dragEnd);
 
         // --- XỬ LÝ NÚT CHỨC NĂNG ---
         const navBar = document.getElementById('navBar');
