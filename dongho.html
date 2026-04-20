@@ -23,6 +23,11 @@
             min-height: 100vh;
         }
 
+        /* Lớp dùng chung để ẩn các thành phần UI */
+        .hidden {
+            display: none !important;
+        }
+
         /* Thanh điều hướng */
         .nav-bar {
             position: absolute;
@@ -31,6 +36,7 @@
             display: flex;
             gap: 10px;
             z-index: 200;
+            transition: all 0.3s;
         }
         .nav-bar a {
             background: rgba(255,255,255,0.1);
@@ -59,6 +65,7 @@
             max-width: 600px;
             z-index: 100;
             margin-top: 50px;
+            transition: all 0.3s;
         }
 
         .control-group {
@@ -93,6 +100,35 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            margin: auto 0; /* Giúp căn giữa khi ẩn bảng điều khiển */
+        }
+
+        /* Nút tùy chỉnh nằm trong góc bảng */
+        .board-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .board-controls button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.2rem;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: 0.3s;
+            outline: none;
+            text-transform: none; /* Tránh bị ảnh hưởng bởi button ở trên */
+        }
+        .board-controls button:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
         }
 
         .digital-clock {
@@ -101,15 +137,6 @@
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0 20px rgba(255,255,255,0.4);
-        }
-
-        .status-text {
-            position: absolute;
-            bottom: 20px;
-            font-family: Arial, sans-serif;
-            font-size: 1.5rem;
-            color: rgba(255,255,255,0.7);
-            letter-spacing: 2px;
         }
 
         .time-up {
@@ -121,17 +148,19 @@
         @media (max-width: 600px) {
             .digital-clock { font-size: 5rem; }
             .board { min-height: 250px; }
+            .board-controls { top: 10px; right: 10px; }
+            .board-controls button { padding: 4px 6px; font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
+    <div class="nav-bar" id="navBar">
         <a href="index.html">📋 Trục Giờ Thi</a>
         <a href="dongho.html" class="active">⏱ Đồng Hồ</a>
     </div>
 
-    <div class="control-panel">
+    <div class="control-panel" id="controlPanel">
         <div class="control-group">
             <div class="radio-group">
                 <label><input type="radio" name="mode" value="realtime" checked> Giờ Thực Tế</label>
@@ -149,10 +178,14 @@
     </div>
 
     <div class="board">
+        <div class="board-controls">
+            <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
+            <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
+        </div>
+
         <div class="time-up" id="timeUpMsg">HẾT GIỜ!</div>
         <div id="clockDisplay" class="digital-clock">00:00:00</div>
-        <div class="status-text" id="boardStatus">THỜI GIAN THỰC</div>
-    </div>
+        </div>
 
     <script>
         let mode = 'realtime';
@@ -164,22 +197,39 @@
 
         const clockDisplay = document.getElementById('clockDisplay');
         const countdownControls = document.getElementById('countdownControls');
-        const boardStatus = document.getElementById('boardStatus');
         const btnStart = document.getElementById('btnStart');
         const btnPause = document.getElementById('btnPause');
 
-        // Lắng nghe thay đổi chế độ
+        // --- XỬ LÝ ẨN/HIỆN GIAO DIỆN VÀ TOÀN MÀN HÌNH ---
+        const navBar = document.getElementById('navBar');
+        const controlPanel = document.getElementById('controlPanel');
+
+        document.getElementById('btnToggleUI').addEventListener('click', () => {
+            navBar.classList.toggle('hidden');
+            controlPanel.classList.toggle('hidden');
+        });
+
+        document.getElementById('btnFullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Trình duyệt không hỗ trợ toàn màn hình: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+
+        // --- LẮNG NGHE THAY ĐỔI CHẾ ĐỘ ---
         document.querySelectorAll('input[name="mode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 mode = e.target.value;
                 if (mode === 'realtime') {
                     countdownControls.style.display = 'none';
-                    boardStatus.textContent = 'THỜI GIAN THỰC';
                     resetCountdown();
                     startRealtime();
                 } else {
                     countdownControls.style.display = 'flex';
-                    boardStatus.textContent = 'SẴN SÀNG ĐẾM NGƯỢC';
                     clearInterval(realtimeInterval);
                     totalSeconds = parseInt(document.getElementById('cdMinutes').value) * 60;
                     updateDisplay(totalSeconds);
@@ -187,10 +237,12 @@
             });
         });
 
+        // --- HÀM FORMAT THỜI GIAN ĐÃ XÓA SỐ 0 Ở ĐẦU TIẾNG ---
         function formatTime(s) {
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
             const sec = s % 60;
+            // Nếu có giờ, in ra h:mm:ss. Nếu không có giờ, in ra mm:ss.
             if (h > 0) return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
@@ -203,7 +255,7 @@
         function startRealtime() {
             const updateRealtime = () => {
                 const now = new Date();
-                const h = now.getHours().toString().padStart(2,'0');
+                const h = now.getHours(); // Không dùng padStart để bỏ số 0 ở đầu
                 const m = now.getMinutes().toString().padStart(2,'0');
                 const s = now.getSeconds().toString().padStart(2,'0');
                 clockDisplay.textContent = `${h}:${m}:${s}`;
@@ -226,7 +278,6 @@
             
             isRunning = true;
             isPaused = false;
-            boardStatus.textContent = 'ĐANG ĐẾM NGƯỢC...';
             btnStart.style.display = 'none';
             btnPause.style.display = 'block';
             document.getElementById('timeUpMsg').style.display = 'none';
@@ -237,7 +288,6 @@
                 if (totalSeconds <= 0) {
                     clearInterval(countdownInterval);
                     isRunning = false;
-                    boardStatus.textContent = 'HOÀN THÀNH';
                     btnStart.style.display = 'block';
                     btnPause.style.display = 'none';
                     document.getElementById('timeUpMsg').style.display = 'block';
@@ -249,7 +299,6 @@
         function pauseCountdown() {
             clearInterval(countdownInterval);
             isPaused = true;
-            boardStatus.textContent = 'TẠM DỪNG';
             btnStart.style.display = 'block';
             btnStart.textContent = '▶ Tiếp Tục';
             btnPause.style.display = 'none';
@@ -262,12 +311,12 @@
             btnStart.style.display = 'block';
             btnStart.textContent = '▶ Bắt Đầu';
             btnPause.style.display = 'none';
-            boardStatus.textContent = 'SẴN SÀNG ĐẾM NGƯỢC';
             document.getElementById('timeUpMsg').style.display = 'none';
             totalSeconds = parseInt(document.getElementById('cdMinutes').value) * 60;
             updateDisplay(totalSeconds);
         }
 
+        // --- CHUÔNG BÁO ---
         function playAlarm() {
             const t = audioCtx.currentTime;
             const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
@@ -283,6 +332,14 @@
             osc1.start(t); osc2.start(t); lfo.start(t);
             osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
         }
+
+        // --- CẢNH BÁO KHI TẢI LẠI TRANG (F5) NẾU ĐANG ĐẾM NGƯỢC ---
+        window.addEventListener('beforeunload', function (e) {
+            if (isRunning) {
+                e.preventDefault(); 
+                e.returnValue = ''; 
+            }
+        });
 
         // Khởi chạy mặc định
         startRealtime();
