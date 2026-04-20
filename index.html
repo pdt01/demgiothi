@@ -83,7 +83,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* Bỏ viền dưới cho nhóm thời gian để đi kèm với text nhắc nhở */
         .time-group {
             border-bottom: none;
             padding-bottom: 0;
@@ -109,19 +108,10 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Nút Áp dụng Inline */
         .btn-apply-inline {
-            background: #3498db;
-            color: white;
-            padding: 6px 15px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            margin-left: 5px;
+            background: #3498db; color: white; padding: 6px 15px; border: none;
+            border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase;
+            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 5px;
         }
         .btn-apply-inline:hover { background: #2980b9; transform: translateY(-1px); }
         .btn-apply-inline:active { transform: translateY(1px); }
@@ -141,7 +131,8 @@
 
         /* Bảng hiển thị */
         .board {
-            background-color: var(--board-bg);
+            /* Sử dụng background-image để fix lỗi đen màn hình trên Samsung Internet */
+            background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
             border: 15px solid var(--board-border);
             border-radius: 10px;
             padding: 60px 50px;
@@ -159,7 +150,37 @@
             margin: auto 0;
         }
 
-        /* Nút tùy chỉnh nằm trong góc bảng */
+        /* CHẾ ĐỘ TỐI GIẢN (Ẩn nền & viền) */
+        .board.minimal {
+            background-color: transparent !important;
+            background-image: none !important;
+            border-color: transparent !important; /* Giữ nguyên độ dày viền để không bị giật layout */
+            box-shadow: none !important;
+        }
+
+        /* Nút ẩn nền bảng (Góc trái) */
+        .board-style-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.2rem;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: 0.3s;
+            z-index: 50;
+            outline: none;
+        }
+        .board-style-btn:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Nút tùy chỉnh nằm trong góc phải bảng */
         .board-controls {
             position: absolute;
             top: 15px;
@@ -289,6 +310,7 @@
             .control-panel { margin-top: 70px; }
             .board-controls { top: 10px; right: 10px; }
             .board-controls button { padding: 4px 6px; font-size: 1rem; }
+            .board-style-btn { top: 10px; left: 10px; padding: 4px 6px; font-size: 1rem; }
             .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; padding: 10px; }
         }
     </style>
@@ -301,7 +323,6 @@
     </div>
 
     <div class="control-panel" id="controlPanel">
-        
         <div class="control-group time-group">
             <label>Bắt đầu: <input type="time" id="startTime" value="08:30"></label>
             <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
@@ -342,6 +363,8 @@
     </div>
 
     <div class="board" id="mainBoard">
+        <button id="btnToggleBoard" class="board-style-btn" title="Ẩn nền và viền bảng">☒</button>
+
         <div class="board-controls">
             <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
             <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
@@ -379,6 +402,8 @@
         // --- XỬ LÝ ẨN/HIỆN GIAO DIỆN VÀ TOÀN MÀN HÌNH ---
         const navBar = document.getElementById('navBar');
         const controlPanel = document.getElementById('controlPanel');
+        const boardEl = document.getElementById('mainBoard');
+        const btnToggleBoard = document.getElementById('btnToggleBoard');
 
         document.getElementById('btnToggleUI').addEventListener('click', () => {
             navBar.classList.toggle('hidden');
@@ -395,6 +420,18 @@
             }
         });
 
+        // Xử lý bật/tắt chế độ tối giản (Ẩn nền bảng)
+        btnToggleBoard.addEventListener('click', () => {
+            boardEl.classList.toggle('minimal');
+            if (boardEl.classList.contains('minimal')) {
+                btnToggleBoard.textContent = '☐';
+                btnToggleBoard.title = "Hiện nền và viền bảng";
+            } else {
+                btnToggleBoard.textContent = '☒';
+                btnToggleBoard.title = "Ẩn nền và viền bảng";
+            }
+        });
+
         // --- LOGIC ĐỒNG HỒ & TRỤC THỜI GIAN ---
         let timerInterval;
         let totalSeconds = 0, remainingSeconds = 0, segmentDurationSeconds = 0;
@@ -403,14 +440,12 @@
         let audioCtx;
         
         const timelineEl = document.getElementById('timeline');
-        const boardEl = document.getElementById('mainBoard');
         const digitalClockEl = document.getElementById('digitalClock');
         const analogClockEl = document.getElementById('analogClock');
         const timelineContainerEl = document.getElementById('timelineContainer');
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // CẢNH BÁO F5
         window.addEventListener('beforeunload', function (e) {
             if (isRunning) {
                 e.preventDefault(); 
