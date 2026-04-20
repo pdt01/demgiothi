@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồng Hồ</title>
+    <title>Đồng Hồ Học Tập - PDT and Friends</title>
     <style>
         :root {
             --board-bg: #1e5128;
@@ -24,11 +24,9 @@
             overflow-x: hidden;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* Bong bóng di động (Floating Bubble) chứa TẤT CẢ các nút */
+        /* --- BONG BÓNG MENU --- */
         .floating-bubble {
             position: fixed;
             top: 20px;
@@ -45,17 +43,20 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             user-select: none;
             touch-action: none; 
-            transition: all 0.3s ease;
+        }
+
+        .floating-bubble:not(.dragging) .bubble-actions {
+            transition: width 0.3s ease, opacity 0.3s ease;
         }
 
         .drag-handle {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 1.2rem;
             cursor: grab;
             padding: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 24px;
         }
         .drag-handle:active { cursor: grabbing; }
 
@@ -63,18 +64,17 @@
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             padding: 0;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background 0.2s, transform 0.2s;
             outline: none;
-            font-family: monospace;
             font-weight: bold;
         }
         .floating-bubble button:hover {
@@ -82,15 +82,24 @@
             transform: scale(1.05);
         }
 
-        /* Vùng chứa các nút hành động (để ẩn đi khi thu gọn) */
         .bubble-actions {
             display: flex;
             gap: 8px;
             overflow: hidden;
+            width: 228px; /* Độ rộng cho 5 nút */
+            opacity: 1;
         }
-        /* Class khi bong bóng bị thu gọn */
+        
         .floating-bubble.collapsed .bubble-actions {
-            display: none;
+            width: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .svg-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
         }
 
         /* Thanh điều hướng */
@@ -101,7 +110,6 @@
             display: flex;
             gap: 10px;
             z-index: 200;
-            transition: all 0.3s;
         }
         .nav-bar a {
             background: rgba(255,255,255,0.1);
@@ -113,9 +121,7 @@
             font-weight: bold;
             transition: 0.3s;
         }
-        .nav-bar a:hover, .nav-bar a.active {
-            background: rgba(255,255,255,0.3);
-        }
+        .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.3); }
 
         .control-panel {
             background: #34495e;
@@ -130,7 +136,6 @@
             max-width: 600px;
             z-index: 100;
             margin-top: 50px;
-            transition: all 0.3s;
         }
 
         .control-group {
@@ -166,9 +171,9 @@
             align-items: center;
             position: relative;
             margin: auto 0;
-            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            transform-origin: center center;
         }
+
+        /* Ẩn board để dùng transform logic zoom bằng inline style JS */
 
         .board.minimal {
             background-color: transparent !important;
@@ -204,15 +209,28 @@
 <body>
 
     <div class="floating-bubble" id="floatingMenu">
-        <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">⠿</div>
+        <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
+        </div>
+        
         <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
         
         <div class="bubble-actions" id="bubbleActions">
-            <button id="btnToggleBoard" title="Ẩn nền và viền bảng">☒</button>
-            <button id="btnZoomOut" title="Thu nhỏ bảng">-</button>
-            <button id="btnZoomIn" title="Phóng to bảng">+</button>
-            <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
-            <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
+            <button id="btnToggleBoard" title="Ẩn nền và viền bảng">
+                <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
+            </button>
+            <button id="btnZoomOut" title="Thu nhỏ bảng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+            </button>
+            <button id="btnZoomIn" title="Phóng to bảng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+            <button id="btnToggleUI" title="Cài đặt">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            </button>
+            <button id="btnFullscreen" title="Toàn màn hình">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -249,115 +267,100 @@
     </div>
 
     <script>
-        // --- LOGIC KÉO THẢ VÀ THU GỌN BONG BÓNG MENU ---
+        // --- LOGIC KÉO THẢ MƯỢT ---
         const floatingMenu = document.getElementById('floatingMenu');
         const dragHandle = document.getElementById('dragHandle');
         const btnCollapseBubble = document.getElementById('btnCollapseBubble');
+        
         let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
+        let currentX, currentY, initialX, initialY;
+        let xOffset = 0, yOffset = 0;
 
-        // Xử lý thu gọn bong bóng
         btnCollapseBubble.addEventListener('click', () => {
             floatingMenu.classList.toggle('collapsed');
-            if (floatingMenu.classList.contains('collapsed')) {
-                btnCollapseBubble.textContent = '▶';
-                btnCollapseBubble.title = "Mở rộng menu";
-            } else {
-                btnCollapseBubble.textContent = '◀';
-                btnCollapseBubble.title = "Thu gọn menu";
-            }
+            btnCollapseBubble.textContent = floatingMenu.classList.contains('collapsed') ? '▶' : '◀';
         });
 
-        // Xử lý kéo thả
-        function startDrag(e) {
-            isDragging = true;
-            const rect = floatingMenu.getBoundingClientRect();
-            floatingMenu.style.right = 'auto';
-            floatingMenu.style.left = rect.left + 'px';
-            floatingMenu.style.top = rect.top + 'px';
-            
-            initialLeft = rect.left;
-            initialTop = rect.top;
-            
-            if (e.type === 'touchstart') {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
             } else {
-                startX = e.clientX;
-                startY = e.clientY;
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+            if (e.target === dragHandle || dragHandle.contains(e.target)) {
+                isDragging = true;
+                floatingMenu.classList.add('dragging');
             }
         }
 
-        function doDrag(e) {
-            if (!isDragging) return;
-            e.preventDefault(); 
-            let currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            let currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-            
-            let dx = currentX - startX;
-            let dy = currentY - startY;
-            
-            let newLeft = initialLeft + dx;
-            let newTop = initialTop + dy;
-            
-            const maxX = window.innerWidth - floatingMenu.offsetWidth;
-            const maxY = window.innerHeight - floatingMenu.offsetHeight;
-            newLeft = Math.max(0, Math.min(newLeft, maxX));
-            newTop = Math.max(0, Math.min(newTop, maxY));
-            
-            floatingMenu.style.left = newLeft + 'px';
-            floatingMenu.style.top = newTop + 'px';
+        function dragEnd() {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            floatingMenu.classList.remove('dragging');
         }
 
-        function endDrag() { isDragging = false; }
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                requestAnimationFrame(() => {
+                    floatingMenu.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                });
+            }
+        }
 
-        dragHandle.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', endDrag);
+        floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
+        floatingMenu.addEventListener("touchend", dragEnd, { passive: false });
+        floatingMenu.addEventListener("touchmove", drag, { passive: false });
 
-        dragHandle.addEventListener('touchstart', startDrag, {passive: false});
-        document.addEventListener('touchmove', doDrag, {passive: false});
-        document.addEventListener('touchend', endDrag);
+        floatingMenu.addEventListener("mousedown", dragStart);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("mousemove", drag);
 
-        // --- XỬ LÝ ẨN/HIỆN GIAO DIỆN CHÍNH, TOÀN MÀN HÌNH VÀ ZOOM ---
+        // --- XỬ LÝ NÚT CHỨC NĂNG ---
         const navBar = document.getElementById('navBar');
         const controlPanel = document.getElementById('controlPanel');
         const boardEl = document.getElementById('mainBoard');
-        const btnToggleBoard = document.getElementById('btnToggleBoard');
         const footerCopy = document.getElementById('footerCopy');
+        const btnToggleBoard = document.getElementById('btnToggleBoard');
+        const iconBoard = document.getElementById('iconBoard');
         let currentScale = 1;
 
-        // Nút Cài đặt (Bánh răng)
         document.getElementById('btnToggleUI').addEventListener('click', () => {
             navBar.classList.toggle('hidden');
             controlPanel.classList.toggle('hidden');
-            footerCopy.classList.toggle('hidden'); 
+            footerCopy.classList.toggle('hidden');
         });
 
-        // Nút Toàn màn hình
         document.getElementById('btnFullscreen').addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Trình duyệt không hỗ trợ toàn màn hình: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => alert("Lỗi: " + err.message));
             } else {
                 document.exitFullscreen();
             }
         });
 
-        // Nút Ẩn/hiện nền bảng
         btnToggleBoard.addEventListener('click', () => {
             boardEl.classList.toggle('minimal');
             if (boardEl.classList.contains('minimal')) {
-                btnToggleBoard.textContent = '☐';
-                btnToggleBoard.title = "Hiện nền và viền bảng";
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>';
             } else {
-                btnToggleBoard.textContent = '☒';
-                btnToggleBoard.title = "Ẩn nền và viền bảng";
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/>';
             }
         });
 
-        // Nút Phóng to/Thu nhỏ bảng
         document.getElementById('btnZoomIn').addEventListener('click', () => {
             if (currentScale < 2.5) { 
                 currentScale += 0.1;
@@ -372,11 +375,10 @@
             }
         });
 
-        // --- LOGIC ĐỒNG HỒ & ĐẾM NGƯỢC ---
+        // --- LOGIC THỜI GIAN ---
         let mode = 'realtime';
         let realtimeInterval, countdownInterval;
-        let isRunning = false;
-        let isPaused = false;
+        let isRunning = false, isPaused = false;
         let totalSeconds = 0;
         let audioCtx;
 
@@ -402,23 +404,17 @@
         });
 
         function formatTime(s) {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = s % 60;
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             if (h > 0) return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        function updateDisplay(s) {
-            clockDisplay.textContent = formatTime(s);
-        }
+        function updateDisplay(s) { clockDisplay.textContent = formatTime(s); }
 
         function startRealtime() {
             const updateRealtime = () => {
                 const now = new Date();
-                const h = now.getHours();
-                const m = now.getMinutes().toString().padStart(2,'0');
-                const s = now.getSeconds().toString().padStart(2,'0');
+                const h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0'), s = now.getSeconds().toString().padStart(2,'0');
                 clockDisplay.textContent = `${h}:${m}:${s}`;
             };
             updateRealtime();
@@ -428,18 +424,12 @@
 
         function startCountdown() {
             if (isRunning && !isPaused) return;
-            
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            if (!isPaused) {
-                totalSeconds = parseInt(document.getElementById('cdMinutes').value) * 60;
-            }
+            if (!isPaused) totalSeconds = parseInt(document.getElementById('cdMinutes').value) * 60;
             
-            isRunning = true;
-            isPaused = false;
-            btnStart.style.display = 'none';
-            btnPause.style.display = 'block';
+            isRunning = true; isPaused = false;
+            btnStart.style.display = 'none'; btnPause.style.display = 'block';
             document.getElementById('timeUpMsg').style.display = 'none';
 
             countdownInterval = setInterval(() => {
@@ -448,8 +438,7 @@
                 if (totalSeconds <= 0) {
                     clearInterval(countdownInterval);
                     isRunning = false;
-                    btnStart.style.display = 'block';
-                    btnPause.style.display = 'none';
+                    btnStart.style.display = 'block'; btnPause.style.display = 'none';
                     document.getElementById('timeUpMsg').style.display = 'block';
                     playAlarm();
                 }
@@ -459,17 +448,15 @@
         function pauseCountdown() {
             clearInterval(countdownInterval);
             isPaused = true;
-            btnStart.style.display = 'block';
-            btnStart.textContent = '▶ Tiếp Tục';
+            btnStart.style.display = 'block'; btnStart.textContent = '▶ Tiếp Tục';
             btnPause.style.display = 'none';
         }
 
         function resetCountdown() {
+            if (isRunning && !confirm("Đồng hồ đang đếm ngược! Bạn có chắc chắn muốn đặt lại không?")) return;
             clearInterval(countdownInterval);
-            isRunning = false;
-            isPaused = false;
-            btnStart.style.display = 'block';
-            btnStart.textContent = '▶ Bắt Đầu';
+            isRunning = false; isPaused = false;
+            btnStart.style.display = 'block'; btnStart.textContent = '▶ Bắt Đầu';
             btnPause.style.display = 'none';
             document.getElementById('timeUpMsg').style.display = 'none';
             totalSeconds = parseInt(document.getElementById('cdMinutes').value) * 60;
@@ -478,27 +465,20 @@
 
         function playAlarm() {
             const t = audioCtx.currentTime;
-            const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
-            const osc2 = audioCtx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 1000;
-            const lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 35;
-            const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 1;
-            const mainGain = audioCtx.createGain(); mainGain.gain.setValueAtTime(0, t);
-            mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); mainGain.gain.setValueAtTime(0.2, t + 2.5);
-            mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
-            const vca = audioCtx.createGain(); vca.gain.value = 0.5;
-            lfo.connect(lfoGain); lfoGain.connect(vca.gain);
-            osc1.connect(vca); osc2.connect(vca); vca.connect(mainGain); mainGain.connect(audioCtx.destination);
-            osc1.start(t); osc2.start(t); lfo.start(t);
-            osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
+            const osc1 = audioCtx.createOscillator(), osc2 = audioCtx.createOscillator(), lfo = audioCtx.createOscillator();
+            osc1.type = 'square'; osc1.frequency.value = 750;
+            osc2.type = 'square'; osc2.frequency.value = 1000;
+            lfo.type = 'sine'; lfo.frequency.value = 35;
+            const lfoGain = audioCtx.createGain(), mainGain = audioCtx.createGain(), vca = audioCtx.createGain();
+            lfoGain.gain.value = 1; vca.gain.value = 0.5;
+            mainGain.gain.setValueAtTime(0, t); mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); 
+            mainGain.gain.setValueAtTime(0.2, t + 2.5); mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
+            lfo.connect(lfoGain); lfoGain.connect(vca.gain); osc1.connect(vca); osc2.connect(vca); 
+            vca.connect(mainGain); mainGain.connect(audioCtx.destination);
+            osc1.start(t); osc2.start(t); lfo.start(t); osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
         }
 
-        window.addEventListener('beforeunload', function (e) {
-            if (isRunning) {
-                e.preventDefault(); 
-                e.returnValue = ''; 
-            }
-        });
-
+        window.addEventListener('beforeunload', e => { if (isRunning) { e.preventDefault(); e.returnValue = ''; }});
         startRealtime();
     </script>
 </body>
