@@ -28,65 +28,56 @@
             overflow-x: hidden;
         }
 
-        .hidden {
-            display: none !important;
+        .hidden { display: none !important; }
+
+        /* BONG BÓNG MENU TỐI ƯU */
+        .floating-bubble {
+            position: fixed; top: 20px; right: 20px; background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px; padding: 5px 10px; display: flex; align-items: center;
+            gap: 8px; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            user-select: none; touch-action: none; transition: background 0.3s ease;
         }
 
+        .drag-handle {
+            color: rgba(255, 255, 255, 0.6); cursor: grab; padding: 5px;
+            display: flex; align-items: center; justify-content: center; width: 24px;
+        }
+        .drag-handle:active { cursor: grabbing; }
+
+        .floating-bubble button {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-size: 1.1rem; padding: 0; border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s, transform 0.2s;
+            outline: none; font-weight: bold; flex-shrink: 0;
+        }
+        .floating-bubble button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+        .bubble-actions {
+            display: flex; gap: 8px; overflow: hidden; max-width: 250px; 
+            transition: max-width 0.3s ease, opacity 0.3s ease;
+        }
+        .floating-bubble.collapsed .bubble-actions { max-width: 0; opacity: 0; pointer-events: none; }
+
+        .svg-icon { width: 18px; height: 18px; fill: currentColor; }
+
         /* Thanh điều hướng */
-        .nav-bar {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 200;
-            transition: all 0.3s;
-        }
+        .nav-bar { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 200; }
         .nav-bar a {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            transition: 0.3s;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; transition: 0.3s;
         }
-        .nav-bar a:hover, .nav-bar a.active {
-            background: rgba(255,255,255,0.3);
-        }
+        .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.3); }
 
         /* Bảng điều khiển */
         .control-panel {
-            background: #34495e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 50px; 
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            max-width: 1050px;
-            z-index: 100;
-            transition: all 0.3s ease;
+            background: #34495e; padding: 20px; border-radius: 12px; margin-top: 50px; margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 1050px; z-index: 100;
         }
 
-        .control-group {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .time-group {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
+        .control-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .time-group { border-bottom: none; padding-bottom: 0; }
 
         label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         input[type="time"], input[type="number"], select { padding: 5px; border-radius: 4px; border: none; text-align: center; font-size: 14px; }
@@ -98,211 +89,64 @@
         .radio-group { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px; }
         .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 5px; }
 
-        .helper-text { 
-            text-align: center; 
-            font-style: italic; 
-            color: #f1c40f; 
-            font-size: 12px; 
-            margin-top: -5px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; margin-top: -5px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 
         .btn-apply-inline {
-            background: #3498db; color: white; padding: 6px 15px; border: none;
-            border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase;
-            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 5px;
+            background: #3498db; color: white; padding: 6px 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 5px;
         }
         .btn-apply-inline:hover { background: #2980b9; transform: translateY(-1px); }
-        .btn-apply-inline:active { transform: translateY(1px); }
 
         .btn-group { display: flex; gap: 15px; justify-content: center; padding-top: 5px; }
-        .btn-panel {
-            padding: 10px 25px; border: none; border-radius: 5px; font-weight: bold; 
-            cursor: pointer; text-transform: uppercase; transition: all 0.2s;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-        }
-        .btn-panel:active { transform: translateY(2px); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .btn-panel { padding: 10px 25px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
         #btnStart { background: #27ae60; color: white; font-size: 15px; }
-        #btnStart:hover { background: #2ecc71; }
         #btnReset { background: #e74c3c; color: white; }
-        #btnReset:hover { background: #c0392b; }
         button:disabled { background: #7f8c8d !important; cursor: not-allowed; transform: none; box-shadow: none; }
 
         /* Bảng hiển thị */
         .board {
             background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
-            border: 15px solid var(--board-border);
-            border-radius: 10px;
-            padding: 60px 50px;
-            width: var(--board-width);
-            max-width: 1100px;
-            min-height: var(--board-min-height);
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            margin: auto 0;
+            border: 15px solid var(--board-border); border-radius: 10px; padding: 60px 50px; width: var(--board-width); max-width: 1100px; min-height: var(--board-min-height);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; margin: auto 0;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
+        .board.minimal { background-color: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; }
 
-        /* Chế độ tối giản */
-        .board.minimal {
-            background-color: transparent !important;
-            background-image: none !important;
-            border-color: transparent !important; 
-            box-shadow: none !important;
-        }
-
-        /* Nút ẩn nền bảng (Góc trái) */
-        .board-style-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            font-size: 1.2rem;
-            padding: 5px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            opacity: 0.3;
-            transition: 0.3s;
-            z-index: 50;
-            outline: none;
-        }
-        .board-style-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
-
-        /* Nút tùy chỉnh nằm trong góc phải bảng */
-        .board-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-            z-index: 50;
-        }
-        .board-controls button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            font-size: 1.2rem;
-            padding: 5px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            opacity: 0.3;
-            transition: 0.3s;
-            outline: none;
-        }
-        .board-controls button:hover { opacity: 1; background: rgba(255,255,255,0.1); }
-
-        .clocks-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 50px;
-            margin-bottom: 40px;
-        }
+        .clocks-wrapper { display: flex; align-items: center; gap: 50px; margin-bottom: 40px; }
 
         /* Đồng hồ kim */
-        .analog-clock {
-            width: 220px; 
-            height: 220px;
-            border: 6px solid #fff;
-            border-radius: 50%;
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3);
-            display: none;
-        }
-        .analog-clock::before {
-            content: ''; position: absolute; width: 14px; height: 14px;
-            background: #fff; border-radius: 50%; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); z-index: 20;
-        }
-        
-        .clock-number {
-            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
-            margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px;
-            color: #fff; font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-size: 1.5rem; font-weight: bold; z-index: 5;
-        }
-
-        .hand {
-            position: absolute; bottom: 50%; transform-origin: bottom center;
-            background: #fff; border-radius: 10px;
-        }
+        .analog-clock { width: 220px; height: 220px; border: 6px solid #fff; border-radius: 50%; position: relative; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3); display: none; }
+        .analog-clock::before { content: ''; position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; }
+        .clock-number { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px; color: #fff; font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.5rem; font-weight: bold; z-index: 5; }
+        .hand { position: absolute; bottom: 50%; transform-origin: bottom center; background: #fff; border-radius: 10px; }
         .hour-hand { width: 8px; height: 55px; left: calc(50% - 4px); z-index: 10; }
         .minute-hand { width: 5px; height: 85px; left: calc(50% - 2.5px); background: #bdc3c7; z-index: 11; }
         .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
 
         /* Đồng hồ số */
-        .digital-clock {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 6rem;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.3);
-            display: none; 
-        }
+        .digital-clock { font-family: 'Courier New', Courier, monospace; font-size: 6rem; font-weight: bold; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3); display: none; }
 
-        /* Trục thời gian */
         .timeline-container { position: relative; width: 100%; margin-top: 20px; display: block; }
         .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: 'Comic Sans MS', cursive, sans-serif; color: #fff; }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
         .timeline-track { position: relative; display: flex; width: 100%; height: 5px; background-color: #fff; }
+        .timeline-track::after { content: ''; position: absolute; right: -25px; top: -10px; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 25px solid #fff; transition: all 0.3s ease; }
         
-        /* MŨI TÊN TRỤC SỐ (Arrowhead) */
-        .timeline-track::after {
-            content: ''; position: absolute; right: -25px; top: -10px;
-            border-top: 12px solid transparent; border-bottom: 12px solid transparent; 
-            border-left: 25px solid #fff; /* Màu mặc định khi dừng */
-            transition: all 0.3s ease;
-        }
-
-        /* HIỆU ỨNG NHẤP NHÁY KHI ĐANG CHẠY */
-        .running .timeline-track::after {
-            border-left-color: #e74c3c; /* Đổi sang màu đỏ */
-            animation: blink 1.5s infinite;
-            filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.8)); /* Tỏa sáng nhẹ */
-        }
-
-        @keyframes blink { 
-            0%, 100% { opacity: 1; } 
-            50% { opacity: 0.3; } 
-        }
+        .running .timeline-track::after { border-left-color: #e74c3c; animation: blink 1.5s infinite; filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.8)); }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .segment { flex: 1; position: relative; }
         .segment::before { content: ''; position: absolute; left: 0; top: -12px; width: 4px; height: 30px; background-color: #fff; }
         .segment:last-child::after { content: ''; position: absolute; right: 0; top: -12px; width: 4px; height: 30px; background-color: #fff; }
+        .tick-label { position: absolute; bottom: -45px; right: -2px; transform: translateX(50%); font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff; white-space: nowrap; }
 
-        .tick-label {
-            position: absolute; bottom: -45px; right: -2px; transform: translateX(50%);
-            font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff; white-space: nowrap;
-        }
-
-        /* Hiệu ứng gạch */
-        .slash-nhieunet {
-            position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
-            background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
-            display: none; z-index: 10;
-        }
+        .slash-nhieunet { position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%); background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px); display: none; z-index: 10; }
         .crossed .slash-nhieunet { display: block; }
 
-        .time-up {
-            display: none; position: absolute; bottom: 30px; right: 40px;
-            font-size: 4rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif;
-            transform: rotate(-5deg); z-index: 50;
-        }
+        .time-up { display: none; position: absolute; bottom: 30px; right: 40px; font-size: 4rem; color: #e74c3c; font-family: 'Comic Sans MS', cursive, sans-serif; transform: rotate(-5deg); z-index: 50; }
         
-        .footer-copyleft {
-            margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;
-        }
-        .control-panel.hidden ~ .footer-copyleft { display: none; }
+        .footer-copyleft { margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5; }
 
         @media (max-width: 600px) {
             .clocks-wrapper { flex-direction: column; gap: 20px; }
@@ -310,14 +154,29 @@
             .time-label { font-size: 1.5rem; top: -45px; }
             .tick-label { font-size: 1.2rem; bottom: -30px; }
             .control-panel { margin-top: 70px; }
-            .board-controls { top: 10px; right: 10px; }
-            .board-controls button { padding: 4px 6px; font-size: 1rem; }
-            .board-style-btn { top: 10px; left: 10px; padding: 4px 6px; font-size: 1rem; }
             .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; padding: 10px; }
         }
     </style>
 </head>
 <body>
+
+    <div class="floating-bubble" id="floatingMenu">
+        <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
+        </div>
+        <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
+        <div class="bubble-actions" id="bubbleActions">
+            <button id="btnToggleBoard" title="Ẩn nền và viền bảng">
+                <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
+            </button>
+            <button id="btnToggleUI" title="Cài đặt">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            </button>
+            <button id="btnFullscreen" title="Toàn màn hình">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
+        </div>
+    </div>
 
     <div class="nav-bar" id="navBar">
         <a href="index.html" class="active">📋 Trục Giờ Thi</a>
@@ -334,9 +193,9 @@
                 <option value="elapsed">Đã qua (30p)</option>
                 <option value="clock">Giờ thực (9h00)</option>
             </select>
-            <button class="btn-apply-inline" id="btnApply" onclick="applySettings()" title="Lưu thông số thời gian">🔄 Áp Dụng</button>
+            <button class="btn-apply-inline" id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
         </div>
-        <div class="helper-text">* Vui lòng nhấn "Áp dụng" ngay sau khi bạn thay đổi các thông số thời gian ở trên.</div>
+        <div class="helper-text">* Vui lòng nhấn "Áp dụng" ngay sau khi thay đổi thời gian.</div>
 
         <div class="control-group">
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
@@ -365,13 +224,6 @@
     </div>
 
     <div class="board" id="mainBoard">
-        <button id="btnToggleBoard" class="board-style-btn" title="Ẩn nền và viền bảng">☒</button>
-
-        <div class="board-controls">
-            <button id="btnToggleUI" title="Ẩn/Hiện Cài đặt">⚙️</button>
-            <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
-        </div>
-
         <div class="clocks-wrapper">
             <div id="analogClock" class="analog-clock">
                 <div class="hand hour-hand" id="hourHand"></div>
@@ -381,7 +233,7 @@
             <div id="digitalClock" class="digital-clock">0:00:00</div>
         </div>
 
-        <div id="timelineContainer" class="timeline-container">
+        <div class="timeline-container" id="timelineContainer">
             <div class="time-label start-label" id="startLabel">8h30</div>
             <div class="timeline-track" id="timeline"></div>
             <div class="time-label end-label" id="endLabel">11h00</div>
@@ -396,12 +248,94 @@
     </div>
 
     <script>
-        // --- XỬ LÝ ẨN/HIỆN GIAO DIỆN VÀ TOÀN MÀN HÌNH ---
+        // --- GIỮ SÁNG MÀN HÌNH (WAKE LOCK API) ---
+        let wakeLock = null;
+        async function keepScreenAwake() {
+            try {
+                if ('wakeLock' in navigator && wakeLock === null) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Đã bật chống tắt màn hình');
+                }
+            } catch (err) { console.log('Không thể giữ sáng:', err); }
+        }
+
+        function allowScreenSleep() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => { wakeLock = null; console.log('Đã tắt chống tắt màn hình'); });
+            }
+        }
+
+        // --- LOGIC KÉO THẢ TỐI ƯU ---
+        const floatingMenu = document.getElementById('floatingMenu');
+        const dragHandle = document.getElementById('dragHandle');
+        const btnCollapseBubble = document.getElementById('btnCollapseBubble');
+        
+        let isDragging = false;
+        let dragStartX, dragStartY;
+
+        btnCollapseBubble.addEventListener('click', () => {
+            floatingMenu.classList.toggle('collapsed');
+            btnCollapseBubble.textContent = floatingMenu.classList.contains('collapsed') ? '▶' : '◀';
+        });
+
+        function dragStart(e) {
+            if (e.target === dragHandle || dragHandle.contains(e.target)) {
+                isDragging = true;
+                if (e.type === "touchstart") {
+                    dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY;
+                } else {
+                    dragStartX = e.clientX; dragStartY = e.clientY;
+                }
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+            let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+            let dx = clientX - dragStartX; let dy = clientY - dragStartY;
+            
+            requestAnimationFrame(() => {
+                floatingMenu.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+            });
+        }
+
+        function dragEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const rect = floatingMenu.getBoundingClientRect();
+            floatingMenu.style.transform = 'none'; 
+            
+            const maxY = window.innerHeight - rect.height;
+            floatingMenu.style.top = Math.max(0, Math.min(rect.top, maxY)) + 'px';
+            
+            if (rect.left + rect.width / 2 > window.innerWidth / 2) {
+                const rightDist = window.innerWidth - rect.right;
+                floatingMenu.style.left = 'auto';
+                floatingMenu.style.right = Math.max(0, rightDist) + 'px';
+            } else {
+                floatingMenu.style.right = 'auto';
+                floatingMenu.style.left = Math.max(0, rect.left) + 'px';
+            }
+        }
+
+        floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
+        document.addEventListener("touchmove", drag, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+
+        floatingMenu.addEventListener("mousedown", dragStart);
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("mouseup", dragEnd);
+
+        // --- XỬ LÝ NÚT CHỨC NĂNG ---
         const navBar = document.getElementById('navBar');
         const controlPanel = document.getElementById('controlPanel');
         const boardEl = document.getElementById('mainBoard');
-        const btnToggleBoard = document.getElementById('btnToggleBoard');
         const footerCopy = document.getElementById('footerCopy');
+        const btnToggleBoard = document.getElementById('btnToggleBoard');
+        const iconBoard = document.getElementById('iconBoard');
 
         document.getElementById('btnToggleUI').addEventListener('click', () => {
             navBar.classList.toggle('hidden');
@@ -411,32 +345,26 @@
 
         document.getElementById('btnFullscreen').addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Trình duyệt của bạn không hỗ trợ toàn màn hình: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => alert("Lỗi: " + err.message));
             } else {
                 document.exitFullscreen();
             }
         });
 
-        // Xử lý bật/tắt chế độ tối giản (Ẩn nền bảng)
         btnToggleBoard.addEventListener('click', () => {
             boardEl.classList.toggle('minimal');
             if (boardEl.classList.contains('minimal')) {
-                btnToggleBoard.textContent = '☐';
-                btnToggleBoard.title = "Hiện nền và viền bảng";
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>';
             } else {
-                btnToggleBoard.textContent = '☒';
-                btnToggleBoard.title = "Ẩn nền và viền bảng";
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/>';
             }
         });
 
-        // --- LOGIC ĐỒNG HỒ & TRỤC THỜI GIAN ---
-        let timerInterval;
+        // --- LOGIC THỜI GIAN ---
+        let timerInterval, audioCtx;
         let totalSeconds = 0, remainingSeconds = 0, segmentDurationSeconds = 0;
         let startH = 0, startM = 0; 
         let isRunning = false, currentCrossedCount = 0;
-        let audioCtx;
         
         const timelineEl = document.getElementById('timeline');
         const digitalClockEl = document.getElementById('digitalClock');
@@ -444,20 +372,22 @@
         const timelineContainerEl = document.getElementById('timelineContainer');
         const rootVars = document.documentElement.style;
 
-        window.addEventListener('beforeunload', function (e) {
-            if (isRunning) {
-                e.preventDefault(); 
-                e.returnValue = ''; 
+        // Phục hồi Wake Lock nếu người dùng chuyển tab rồi quay lại
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isRunning) {
+                keepScreenAwake();
             }
         });
+
+        // Cảnh báo F5
+        window.addEventListener('beforeunload', e => { if (isRunning) { e.preventDefault(); e.returnValue = ''; }});
 
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
             const radius = 85; 
             for (let i = 1; i <= 12; i++) {
                 const num = document.createElement('div');
-                num.className = 'clock-number';
-                num.textContent = i;
+                num.className = 'clock-number'; num.textContent = i;
                 const angle = i * 30;
                 num.style.transform = `rotate(${angle}deg) translate(0, -${radius}px) rotate(-${angle}deg)`;
                 clock.appendChild(num);
@@ -472,57 +402,51 @@
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
-        document.querySelectorAll('input[name="clockType"]').forEach(radio => radio.addEventListener('change', updateVisibility));
+        document.querySelectorAll('input[name="clockType"]').forEach(r => r.addEventListener('change', updateVisibility));
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
         
-        document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
-        document.getElementById('borderColor').addEventListener('input', (e) => rootVars.setProperty('--board-border', e.target.value));
-        document.getElementById('slashColor').addEventListener('input', (e) => rootVars.setProperty('--slash-color', e.target.value));
-        document.getElementById('boardWidth').addEventListener('input', (e) => rootVars.setProperty('--board-width', e.target.value + '%'));
-        document.getElementById('boardHeight').addEventListener('input', (e) => rootVars.setProperty('--board-min-height', e.target.value + 'px'));
+        document.getElementById('bgColor').addEventListener('input', e => rootVars.setProperty('--board-bg', e.target.value));
+        document.getElementById('borderColor').addEventListener('input', e => rootVars.setProperty('--board-border', e.target.value));
+        document.getElementById('slashColor').addEventListener('input', e => rootVars.setProperty('--slash-color', e.target.value));
+        document.getElementById('boardWidth').addEventListener('input', e => rootVars.setProperty('--board-width', e.target.value + '%'));
+        document.getElementById('boardHeight').addEventListener('input', e => rootVars.setProperty('--board-min-height', e.target.value + 'px'));
 
         function formatDigitalTime(s) {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = s % 60;
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        function playAlarm() {
+        function playSound(type) {
             if (!document.getElementById('soundToggle').checked) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const t = audioCtx.currentTime;
-            const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
-            const osc2 = audioCtx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 1000;
-            const lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 35;
-            const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 1;
-            const mainGain = audioCtx.createGain(); mainGain.gain.setValueAtTime(0, t);
-            mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); mainGain.gain.setValueAtTime(0.2, t + 2.5);
-            mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
-            const vca = audioCtx.createGain(); vca.gain.value = 0.5;
-            lfo.connect(lfoGain); lfoGain.connect(vca.gain);
-            osc1.connect(vca); osc2.connect(vca); vca.connect(mainGain); mainGain.connect(audioCtx.destination);
-            osc1.start(t); osc2.start(t); lfo.start(t);
-            osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
-        }
-
-        function playChalkSound() {
-            if (!document.getElementById('soundToggle').checked) return;
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const createScratch = (timeOffset) => {
-                const bufferSize = audioCtx.sampleRate * 0.15;
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-                const filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 3500; filter.Q.value = 1.2;
-                const gain = audioCtx.createGain(); const t = audioCtx.currentTime + timeOffset;
-                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.6, t + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
-                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start(t);
-            };
-            createScratch(0); createScratch(0.18); createScratch(0.36);
+            
+            if (type === 'alarm') {
+                const t = audioCtx.currentTime;
+                const osc1 = audioCtx.createOscillator(), osc2 = audioCtx.createOscillator(), lfo = audioCtx.createOscillator();
+                osc1.type = 'square'; osc1.frequency.value = 750; osc2.type = 'square'; osc2.frequency.value = 1000;
+                lfo.type = 'sine'; lfo.frequency.value = 35;
+                const lfoGain = audioCtx.createGain(), mainGain = audioCtx.createGain(), vca = audioCtx.createGain();
+                lfoGain.gain.value = 1; vca.gain.value = 0.5;
+                mainGain.gain.setValueAtTime(0, t); mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); 
+                mainGain.gain.setValueAtTime(0.2, t + 2.5); mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
+                lfo.connect(lfoGain); lfoGain.connect(vca.gain); osc1.connect(vca); osc2.connect(vca); 
+                vca.connect(mainGain); mainGain.connect(audioCtx.destination);
+                osc1.start(t); osc2.start(t); lfo.start(t); osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
+            } else if (type === 'chalk') {
+                const createScratch = (timeOffset) => {
+                    const bufferSize = audioCtx.sampleRate * 0.15;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                    const filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 3500; filter.Q.value = 1.2;
+                    const gain = audioCtx.createGain(); const t = audioCtx.currentTime + timeOffset;
+                    gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.6, t + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                    noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start(t);
+                };
+                createScratch(0); createScratch(0.18); createScratch(0.36);
+            }
         }
 
         function init() {
@@ -588,17 +512,15 @@
                 const segs = document.querySelectorAll('.segment');
                 for (let i = currentCrossedCount; i < crossed; i++) if(segs[i]) segs[i].classList.add('crossed');
                 currentCrossedCount = crossed;
-                if (remainingSeconds > 0) playChalkSound();
+                if (remainingSeconds > 0) playSound('chalk');
             }
         }
 
         function applySettings() {
-            if (isRunning) {
-                const confirmReset = confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?");
-                if (!confirmReset) return; 
-            }
+            if (isRunning && !confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?")) return;
             clearInterval(timerInterval);
             isRunning = false;
+            allowScreenSleep(); // Tắt giữ sáng màn hình
             document.getElementById('btnStart').disabled = false;
             init();
         }
@@ -606,13 +528,11 @@
         function startTimer() {
             if (isRunning) return;
             if (remainingSeconds <= 0) init();
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            // Gắn class running để hiệu ứng mũi tên nhấp nháy hoạt động
+            keepScreenAwake(); // Bật giữ sáng màn hình
+            
             isRunning = true;
             boardEl.classList.add('running');
-            
             document.getElementById('btnStart').disabled = true;
             timerInterval = setInterval(() => {
                 remainingSeconds--;
@@ -620,19 +540,17 @@
                 if (remainingSeconds <= 0) {
                     clearInterval(timerInterval);
                     isRunning = false;
-                    boardEl.classList.remove('running'); // Tắt nhấp nháy khi xong
+                    allowScreenSleep(); // Tắt giữ sáng màn hình
+                    boardEl.classList.remove('running');
                     document.getElementById('btnStart').disabled = false;
                     document.getElementById('timeUpMsg').style.display = 'block';
-                    playAlarm();
+                    playSound('alarm');
                 }
             }, 1000);
         }
 
         function resetTimer() { 
-            if (isRunning) {
-                const confirmReset = confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?");
-                if (!confirmReset) return; 
-            }
+            if (isRunning && !confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn đặt lại không?")) return;
             applySettings(); 
         }
 
