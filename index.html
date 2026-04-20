@@ -94,42 +94,42 @@
             margin-bottom: 40px;
         }
 
-        /* Đồng hồ kim */
+        /* Đồng hồ kim - ĐÃ LÀM TO HƠN (220px) */
         .analog-clock {
-            width: 160px; 
-            height: 160px;
-            border: 5px solid #fff;
+            width: 220px; 
+            height: 220px;
+            border: 6px solid #fff;
             border-radius: 50%;
             position: relative;
             background: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.4), 0 0 10px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3);
             display: none;
         }
         .analog-clock::before {
-            content: ''; position: absolute; width: 12px; height: 12px;
+            content: ''; position: absolute; width: 14px; height: 14px;
             background: #fff; border-radius: 50%; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 20;
         }
         
         .clock-number {
-            position: absolute; top: 50%; left: 50%; width: 30px; height: 30px;
-            margin-top: -15px; margin-left: -15px; text-align: center; line-height: 30px;
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
+            margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px;
             color: #fff; font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-size: 1.2rem; font-weight: bold; z-index: 5;
+            font-size: 1.5rem; font-weight: bold; z-index: 5;
         }
 
         .hand {
             position: absolute; bottom: 50%; transform-origin: bottom center;
             background: #fff; border-radius: 10px;
         }
-        .hour-hand { width: 6px; height: 40px; left: calc(50% - 3px); z-index: 10; }
-        .minute-hand { width: 4px; height: 60px; left: calc(50% - 2px); background: #bdc3c7; z-index: 11; }
-        .second-hand { width: 2px; height: 75px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
+        .hour-hand { width: 8px; height: 55px; left: calc(50% - 4px); z-index: 10; }
+        .minute-hand { width: 5px; height: 85px; left: calc(50% - 2.5px); background: #bdc3c7; z-index: 11; }
+        .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
 
         /* Đồng hồ số */
         .digital-clock {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 5.5rem;
+            font-size: 6rem;
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0 20px rgba(255,255,255,0.3);
@@ -156,7 +156,7 @@
             font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 1.6rem; color: #fff; white-space: nowrap;
         }
 
-        /* Hiệu ứng gạch nhiều nét */
+        /* Hiệu ứng gạch */
         .slash-nhieunet {
             position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%);
             background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px);
@@ -168,8 +168,6 @@
         .status-indicator { position: absolute; bottom: 20px; left: 25px; display: flex; align-items: center; gap: 10px; opacity: 0.6; }
         .rec-dot { width: 12px; height: 12px; background-color: #e74c3c; border-radius: 50%; }
         .running .rec-dot { animation: blink 1.5s infinite; box-shadow: 0 0 10px #e74c3c; }
-        
-        /* Font Arial */
         .status-text { font-family: Arial, sans-serif; font-size: 1rem; color: #fff; font-weight: bold; letter-spacing: 1px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
@@ -205,7 +203,7 @@
             <label><input type="checkbox" id="checkAnalog" checked> Đồng hồ kim</label>
             <label><input type="checkbox" id="checkClock"> Đồng hồ số</label>
             <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
-            <label><input type="checkbox" id="soundToggle" checked> Bật âm thanh (Chuông & Phấn)</label>
+            <label><input type="checkbox" id="soundToggle" checked> Bật âm thanh</label>
         </div>
         
         <div class="helper-text">* Nhấn "Áp dụng" sau khi thay đổi thông số thời gian.</div>
@@ -224,7 +222,6 @@
                 <div class="hand minute-hand" id="minuteHand"></div>
                 <div class="hand second-hand" id="secondHand"></div>
             </div>
-            
             <div id="digitalClock" class="digital-clock">0:00:00</div>
         </div>
 
@@ -262,10 +259,9 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // Vẽ 12 số cho đồng hồ kim
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
-            const radius = 62; 
+            const radius = 85; // Tăng bán kính đặt số cho đồng hồ to
             for (let i = 1; i <= 12; i++) {
                 const num = document.createElement('div');
                 num.className = 'clock-number';
@@ -277,14 +273,31 @@
         }
         drawClockNumbers();
 
-        const updateVisibility = () => {
-            digitalClockEl.style.display = document.getElementById('checkClock').checked ? 'block' : 'none';
-            analogClockEl.style.display = document.getElementById('checkAnalog').checked ? 'block' : 'none';
+        // --- LOGIC ĐỘC QUYỀN ĐỒNG HỒ ---
+        const checkAnalog = document.getElementById('checkAnalog');
+        const checkClock = document.getElementById('checkClock');
+
+        const updateVisibility = (e) => {
+            if (checkAnalog.checked && checkClock.checked) {
+                // Nếu người dùng vừa nhấn vào checkClock khi checkAnalog đang bật
+                if (e.target.id === 'checkClock') {
+                    checkClock.checked = false;
+                    alert("Bạn phải tắt đồng hồ kim trước khi bật đồng hồ số!");
+                } 
+                // Ngược lại
+                else {
+                    checkAnalog.checked = false;
+                    alert("Bạn phải tắt đồng hồ số trước khi bật đồng hồ kim!");
+                }
+            }
+            
+            digitalClockEl.style.display = checkClock.checked ? 'block' : 'none';
+            analogClockEl.style.display = checkAnalog.checked ? 'block' : 'none';
             timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
         };
 
-        document.getElementById('checkClock').addEventListener('change', updateVisibility);
-        document.getElementById('checkAnalog').addEventListener('change', updateVisibility);
+        checkAnalog.addEventListener('change', updateVisibility);
+        checkClock.addEventListener('change', updateVisibility);
         document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
         
         document.getElementById('bgColor').addEventListener('input', (e) => rootVars.setProperty('--board-bg', e.target.value));
@@ -300,14 +313,10 @@
             return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        // --- THUẬT TOÁN ÂM THANH ---
-        
-        // 1. Tiếng chuông trường học (Hết giờ)
         function playAlarm() {
             if (!document.getElementById('soundToggle').checked) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const t = audioCtx.currentTime;
             const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 750;
             const osc2 = audioCtx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 1000;
@@ -317,53 +326,28 @@
             mainGain.gain.linearRampToValueAtTime(0.2, t + 0.1); mainGain.gain.setValueAtTime(0.2, t + 2.5);
             mainGain.gain.exponentialRampToValueAtTime(0.001, t + 3);
             const vca = audioCtx.createGain(); vca.gain.value = 0.5;
-            
             lfo.connect(lfoGain); lfoGain.connect(vca.gain);
             osc1.connect(vca); osc2.connect(vca); vca.connect(mainGain); mainGain.connect(audioCtx.destination);
-            
             osc1.start(t); osc2.start(t); lfo.start(t);
             osc1.stop(t + 3); osc2.stop(t + 3); lfo.stop(t + 3);
         }
 
-        // 2. Tiếng phấn gạch xẹt xẹt (Mỗi khi qua 1 vạch)
         function playChalkSound() {
             if (!document.getElementById('soundToggle').checked) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            // Hàm tạo 1 tiếng xẹt ngắn
             const createScratch = (timeOffset) => {
-                const bufferSize = audioCtx.sampleRate * 0.15; // Dài 0.15s
+                const bufferSize = audioCtx.sampleRate * 0.15;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                 const data = buffer.getChannelData(0);
-                // Tạo nhiễu trắng (white noise)
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-
-                // Lọc lấy tần số cao để nghe giống tiếng sột soạt của phấn
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.value = 3500;
-                filter.Q.value = 1.2;
-
-                const gain = audioCtx.createGain();
-                const t = audioCtx.currentTime + timeOffset;
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.6, t + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
-
-                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-                noise.start(t);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 3500; filter.Q.value = 1.2;
+                const gain = audioCtx.createGain(); const t = audioCtx.currentTime + timeOffset;
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.6, t + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start(t);
             };
-
-            // Phát 3 nhịp xẹt liên tiếp để giả lập nét gạch chéo song song
-            createScratch(0);
-            createScratch(0.18);
-            createScratch(0.36);
+            createScratch(0); createScratch(0.18); createScratch(0.36);
         }
 
         function init() {
@@ -397,64 +381,40 @@
                 const seg = document.createElement('div');
                 seg.className = 'segment';
                 seg.innerHTML = `<div class="slash-nhieunet"></div>`;
-                
                 let currentMinuteTick = (i + 1) * interval;
-                
                 if (i !== numSegments - 1 && labelArray.includes(currentMinuteTick)) {
                     const label = document.createElement('div');
                     label.className = 'tick-label';
-                    
-                    if (labelMode === 'elapsed') {
-                        label.textContent = currentMinuteTick + 'p';
-                    } else {
-                        let tickTotalMins = startH * 60 + startM + currentMinuteTick;
-                        let tickH = Math.floor(tickTotalMins / 60) % 24;
-                        let tickM = tickTotalMins % 60;
-                        label.textContent = tickH + 'h' + (tickM < 10 ? '0' + tickM : tickM);
+                    if (labelMode === 'elapsed') label.textContent = currentMinuteTick + 'p';
+                    else {
+                        let tickTotal = startH * 60 + startM + currentMinuteTick;
+                        label.textContent = (Math.floor(tickTotal/60)%24) + 'h' + (tickTotal%60<10?'0'+(tickTotal%60):tickTotal%60);
                     }
                     seg.appendChild(label);
                 }
                 timelineEl.appendChild(seg);
             }
-            updateVisibility();
+            updateVisibility({target: {id: 'none'}});
         }
 
         function updateAnalogClock(remSecs) {
-            const elapsedSecs = totalSeconds - remSecs;
-            const currentSimulatedSecs = (startH * 3600) + (startM * 60) + elapsedSecs;
-
-            const h = Math.floor(currentSimulatedSecs / 3600);
-            const m = Math.floor((currentSimulatedSecs % 3600) / 60);
-            const s = currentSimulatedSecs % 60;
-
-            const degH = (h % 12) * 30 + m * 0.5;
-            const degM = m * 6 + s * 0.1;
-            const degS = s * 6;
-
-            document.getElementById('hourHand').style.transform = `rotate(${degH}deg)`;
-            document.getElementById('minuteHand').style.transform = `rotate(${degM}deg)`;
-            document.getElementById('secondHand').style.transform = `rotate(${degS}deg)`;
+            const elapsed = totalSeconds - remSecs;
+            const simulated = (startH * 3600) + (startM * 60) + elapsed;
+            const h = Math.floor(simulated / 3600), m = Math.floor((simulated % 3600) / 60), s = simulated % 60;
+            document.getElementById('hourHand').style.transform = `rotate(${(h%12)*30 + m*0.5}deg)`;
+            document.getElementById('minuteHand').style.transform = `rotate(${m*6 + s*0.1}deg)`;
+            document.getElementById('secondHand').style.transform = `rotate(${s*6}deg)`;
         }
 
         function update() {
             digitalClockEl.textContent = formatDigitalTime(remainingSeconds);
             updateAnalogClock(remainingSeconds);
-
-            const elapsed = totalSeconds - remainingSeconds;
-            const crossed = Math.floor(elapsed / segmentDurationSeconds);
-            
-            // Xử lý khi có vạch mới bị gạch
+            const crossed = Math.floor((totalSeconds - remainingSeconds) / segmentDurationSeconds);
             if (crossed > currentCrossedCount) {
                 const segs = document.querySelectorAll('.segment');
-                for (let i = currentCrossedCount; i < crossed; i++) {
-                    if(segs[i]) segs[i].classList.add('crossed');
-                }
+                for (let i = currentCrossedCount; i < crossed; i++) if(segs[i]) segs[i].classList.add('crossed');
                 currentCrossedCount = crossed;
-                
-                // Kích hoạt tiếng phấn gạch bảng nếu đang không phải giây số 0
-                if (remainingSeconds > 0) {
-                    playChalkSound();
-                }
+                if (remainingSeconds > 0) playChalkSound();
             }
         }
 
@@ -470,12 +430,10 @@
             if (remainingSeconds <= 0) init();
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             isRunning = true;
             boardEl.classList.add('running');
             statusText.textContent = "ĐANG THI...";
             document.getElementById('btnStart').disabled = true;
-
             timerInterval = setInterval(() => {
                 remainingSeconds--;
                 update();
@@ -492,7 +450,6 @@
         }
 
         function resetTimer() { applySettings(); }
-        
         document.documentElement.style.setProperty('--board-min-height', document.getElementById('boardHeight').value + 'px');
         init();
     </script>
