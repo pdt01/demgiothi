@@ -44,7 +44,7 @@
             z-index: 9999;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             user-select: none;
-            touch-action: none; /* Chặn cuộn trang khi kéo trên điện thoại */
+            touch-action: none; 
         }
 
         .drag-handle {
@@ -64,7 +64,7 @@
             color: white;
             font-size: 1.2rem;
             padding: 8px 12px;
-            border-radius: 50%; /* Nút bo tròn */
+            border-radius: 50%;
             width: 40px;
             height: 40px;
             display: flex;
@@ -84,7 +84,7 @@
             background: #34495e;
             padding: 20px;
             border-radius: 12px;
-            margin-top: 50px; /* Dịch xuống 1 chút trên điện thoại */
+            margin-top: 50px; 
             margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             display: flex;
@@ -246,9 +246,7 @@
         .footer-copyleft {
             margin-top: 20px; font-size: 11px; color: #bdc3c7; text-align: center; opacity: 0.6; line-height: 1.5;
         }
-        .control-panel.hidden ~ .footer-copyleft {
-            display: none; 
-        }
+        .control-panel.hidden ~ .footer-copyleft { display: none; }
 
         /* Responsive cho Mobile */
         @media (max-width: 600px) {
@@ -345,7 +343,6 @@
 
         function startDrag(e) {
             isDragging = true;
-            // Chuyển position right thành left tĩnh để di chuyển mượt
             const rect = floatingMenu.getBoundingClientRect();
             floatingMenu.style.right = 'auto';
             floatingMenu.style.left = rect.left + 'px';
@@ -365,8 +362,7 @@
 
         function doDrag(e) {
             if (!isDragging) return;
-            e.preventDefault(); // Chặn vuốt màn hình
-            
+            e.preventDefault(); 
             let currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
             let currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
             
@@ -376,7 +372,6 @@
             let newLeft = initialLeft + dx;
             let newTop = initialTop + dy;
             
-            // Giới hạn trong màn hình
             const maxX = window.innerWidth - floatingMenu.offsetWidth;
             const maxY = window.innerHeight - floatingMenu.offsetHeight;
             newLeft = Math.max(0, Math.min(newLeft, maxX));
@@ -396,7 +391,6 @@
         document.addEventListener('touchmove', doDrag, {passive: false});
         document.addEventListener('touchend', endDrag);
 
-        // --- XỬ LÝ NÚT CÀI ĐẶT & TOÀN MÀN HÌNH ---
         document.getElementById('btnToggleSettings').addEventListener('click', () => {
             document.getElementById('controlPanel').classList.toggle('hidden');
         });
@@ -425,6 +419,14 @@
         const timelineContainerEl = document.getElementById('timelineContainer');
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
+
+        // --- CẢNH BÁO KHI TẢI LẠI TRANG HOẶC TẮT TAB (F5) ---
+        window.addEventListener('beforeunload', function (e) {
+            if (isRunning) {
+                e.preventDefault(); 
+                e.returnValue = ''; // Bắt buộc đối với các trình duyệt hiện đại
+            }
+        });
 
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
