@@ -82,6 +82,12 @@
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+        
+        /* Bỏ viền dưới cho nhóm thời gian để đi kèm với text nhắc nhở */
+        .time-group {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
 
         label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         input[type="time"], input[type="number"], select { padding: 5px; border-radius: 4px; border: none; text-align: center; font-size: 14px; }
@@ -93,22 +99,49 @@
         .radio-group { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px; }
         .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 5px; }
 
-        .helper-text { text-align: center; font-style: italic; color: #f1c40f; font-size: 12px; }
-
-        .btn-group { display: flex; gap: 10px; justify-content: center; }
-        .btn-panel {
-            padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; 
-            cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+        .helper-text { 
+            text-align: center; 
+            font-style: italic; 
+            color: #f1c40f; 
+            font-size: 12px; 
+            margin-top: -5px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        #btnApply { background: #3498db; color: white; }
-        #btnStart { background: #27ae60; color: white; }
+
+        /* Nút Áp dụng Inline */
+        .btn-apply-inline {
+            background: #3498db;
+            color: white;
+            padding: 6px 15px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-left: 5px;
+        }
+        .btn-apply-inline:hover { background: #2980b9; transform: translateY(-1px); }
+        .btn-apply-inline:active { transform: translateY(1px); }
+
+        .btn-group { display: flex; gap: 15px; justify-content: center; padding-top: 5px; }
+        .btn-panel {
+            padding: 10px 25px; border: none; border-radius: 5px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .btn-panel:active { transform: translateY(2px); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        #btnStart { background: #27ae60; color: white; font-size: 15px; }
+        #btnStart:hover { background: #2ecc71; }
         #btnReset { background: #e74c3c; color: white; }
-        button:disabled { background: #7f8c8d !important; cursor: not-allowed; }
+        #btnReset:hover { background: #c0392b; }
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; transform: none; box-shadow: none; }
 
         /* Bảng hiển thị */
         .board {
-            background-image: linear-gradient(to right, var(--board-bg), var(--board-bg));
-
+            background-color: var(--board-bg);
             border: 15px solid var(--board-border);
             border-radius: 10px;
             padding: 60px 50px;
@@ -256,6 +289,7 @@
             .control-panel { margin-top: 70px; }
             .board-controls { top: 10px; right: 10px; }
             .board-controls button { padding: 4px 6px; font-size: 1rem; }
+            .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; padding: 10px; }
         }
     </style>
 </head>
@@ -267,7 +301,8 @@
     </div>
 
     <div class="control-panel" id="controlPanel">
-        <div class="control-group">
+        
+        <div class="control-group time-group">
             <label>Bắt đầu: <input type="time" id="startTime" value="08:30"></label>
             <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
             <label>Mỗi vạch: <input type="number" id="intervalTime" value="30" style="width:45px"> p</label>
@@ -276,7 +311,10 @@
                 <option value="elapsed">Đã qua (30p)</option>
                 <option value="clock">Giờ thực (9h00)</option>
             </select>
+            <button class="btn-apply-inline" id="btnApply" onclick="applySettings()" title="Lưu thông số thời gian">🔄 Áp Dụng</button>
         </div>
+        <div class="helper-text">* Vui lòng nhấn "Áp dụng" ngay sau khi bạn thay đổi các thông số thời gian ở trên.</div>
+
         <div class="control-group">
             <label>Màu bảng: <input type="color" id="bgColor" value="#1e5128"></label>
             <label>Màu viền: <input type="color" id="borderColor" value="#8b5a2b"></label>
@@ -284,6 +322,7 @@
             <label>Bề ngang: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
             <label>Độ cao: <input type="range" id="boardHeight" min="250" max="700" value="350"></label>
         </div>
+
         <div class="control-group">
             <div class="radio-group">
                 <span style="font-size: 13px; font-weight: bold;">Đồng hồ:</span>
@@ -296,11 +335,8 @@
             <label><input type="checkbox" id="soundToggle" checked> Bật âm thanh</label>
         </div>
         
-        <div class="helper-text">* Nhấn "Áp dụng" sau khi thay đổi thông số thời gian.</div>
-        
         <div class="btn-group">
-            <button class="btn-panel" id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
-            <button class="btn-panel" id="btnStart" onclick="startTimer()">▶ Bắt Đầu</button>
+            <button class="btn-panel" id="btnStart" onclick="startTimer()">▶ Bắt Đầu Tính Giờ</button>
             <button class="btn-panel" id="btnReset" onclick="resetTimer()">⏹ Đặt Lại</button>
         </div>
     </div>
@@ -374,7 +410,7 @@
         const statusText = document.getElementById('statusText');
         const rootVars = document.documentElement.style;
 
-        // --- CẢNH BÁO KHI TẢI LẠI TRANG HOẶC TẮT TAB (F5) ---
+        // CẢNH BÁO F5
         window.addEventListener('beforeunload', function (e) {
             if (isRunning) {
                 e.preventDefault(); 
@@ -559,7 +595,14 @@
             }, 1000);
         }
 
-        function resetTimer() { applySettings(); }
+        function resetTimer() { 
+            if (isRunning) {
+                const confirmReset = confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?");
+                if (!confirmReset) return; 
+            }
+            applySettings(); 
+        }
+
         document.documentElement.style.setProperty('--board-min-height', document.getElementById('boardHeight').value + 'px');
         init();
     </script>
