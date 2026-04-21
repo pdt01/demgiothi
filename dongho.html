@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đồng Hồ</title>
+    <title>Đồng hồ</title>
     <style>
         :root {
             --bg-liquid: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
@@ -35,28 +35,22 @@
         }
 
         .hidden { display: none !important; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--shadow); }
 
-        /* BONG BÓNG MENU */
-        .floating-bubble {
-            position: fixed; top: 20px; right: 20px; background: rgba(44, 62, 80, 0.9);
-            backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px; padding: 5px 10px; display: flex; align-items: center;
-            gap: 8px; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            user-select: none; touch-action: none; transition: background 0.3s ease;
+        /* --- THANH CÔNG CỤ TRUNG TÂM (TOP TOOLBAR) --- */
+        .top-toolbar {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 15px; border-radius: 40px; z-index: 9999;
         }
-
-        .drag-handle { color: rgba(255, 255, 255, 0.6); cursor: grab; padding: 5px; display: flex; align-items: center; justify-content: center; width: 24px; }
-        .drag-handle:active { cursor: grabbing; }
-
-        .floating-bubble button {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            color: white; font-size: 1.1rem; padding: 0; border-radius: 50%;
-            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+        .top-toolbar button {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main); font-size: 1.1rem; padding: 0; border-radius: 50%;
+            width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: 0.2s; outline: none; font-weight: bold; flex-shrink: 0;
         }
-        .floating-bubble button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 350px; transition: max-width 0.3s ease, opacity 0.3s ease; }
-        .floating-bubble.collapsed .bubble-actions { max-width: 0; opacity: 0; pointer-events: none; }
+        .top-toolbar button:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body.dark-theme .top-toolbar button:hover { background: rgba(0,0,0,0.4); }
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* Thanh điều hướng */
@@ -67,12 +61,11 @@
 
         /* Bảng điều khiển */
         .control-panel {
-            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border);
-            padding: 20px; border-radius: 24px; margin-top: 50px; margin-bottom: 25px;
-            display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 650px; z-index: 100; box-shadow: var(--shadow);
+            padding: 20px; border-radius: 24px; margin-top: 80px; margin-bottom: 25px;
+            display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 650px; z-index: 100;
         }
 
-        /* MENU CHỌN CHẾ ĐỘ */
+        /* MENU CHỌN CHẾ ĐỘ ĐỒNG HỒ NẰM TRONG CÀI ĐẶT */
         .mode-selector-menu {
             display: flex; gap: 5px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
             padding: 6px; border-radius: 30px; border: 1px solid var(--glass-border);
@@ -81,7 +74,7 @@
         body.dark-theme .mode-selector-menu { background: rgba(0,0,0,0.2); }
         
         .mode-option {
-            padding: 8px 25px; border-radius: 20px; font-weight: bold; font-size: 0.95rem; color: var(--text-main);
+            padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.95rem; color: var(--text-main);
             cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
         }
         .mode-option:hover { background: rgba(255,255,255,0.3); }
@@ -103,14 +96,14 @@
         #btnPause { background: rgba(243, 156, 18, 0.9); color: white; border: none; display: none; }
         #btnReset { background: rgba(231, 76, 60, 0.9); color: white; border: none; }
 
-        /* BẢNG HIỂN THỊ CHÍNH */
+        /* BẢNG HIỂN THỊ CHÍNH (Kính mờ bo góc) */
         .board {
-            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 60px 50px;
+            border-radius: 24px; padding: 60px 50px;
             width: 85%; max-width: 800px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin: auto 0;
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            transform-origin: center center; box-shadow: var(--shadow);
+            transform-origin: center center;
         }
+        .board.minimal { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
 
         .digital-clock { font-family: -apple-system, sans-serif; font-size: 10rem; font-weight: bold; color: var(--text-main); letter-spacing: -3px; text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--accent-glow); }
 
@@ -121,29 +114,27 @@
         .footer-copyleft a { color: var(--text-main); text-decoration: underline; font-weight: bold; }
 
         @media (max-width: 600px) {
+            .nav-bar { top: 75px; left: 50%; transform: translateX(-50%); width: max-content; }
+            .control-panel { margin-top: 135px; }
             .digital-clock { font-size: 5rem; }
             .board { min-height: 250px; width: 95%; padding: 40px 20px; }
-            .mode-option { padding: 6px 15px; font-size: 0.8rem; }
+            .mode-option { padding: 6px 12px; font-size: 0.8rem; }
+            .top-toolbar { width: max-content; padding: 6px 12px; gap: 8px; }
+            .top-toolbar button { width: 34px; height: 34px; font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="floating-bubble" id="floatingMenu">
-        <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
-        </div>
-        <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
-        <div class="bubble-actions" id="bubbleActions">
-            <button id="btnThemeToggle" title="Giao diện Sáng/Tối">🌗</button>
-            <button id="btnToggleBoard" title="Ẩn nền bảng">
-                <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
-            </button>
-            <button id="btnZoomOut" title="Thu nhỏ bảng">-</button>
-            <button id="btnZoomIn" title="Phóng to bảng">+</button>
-            <button id="btnToggleUI" title="Cài đặt">⚙️</button>
-            <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
-        </div>
+    <div class="top-toolbar glass-panel" id="topToolbar">
+        <button id="btnThemeToggle" title="Giao diện Sáng/Tối">🌗</button>
+        <button id="btnToggleBoard" title="Ẩn nền bảng">
+            <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
+        </button>
+        <button id="btnZoomOut" title="Thu nhỏ bảng">-</button>
+        <button id="btnZoomIn" title="Phóng to bảng">+</button>
+        <button id="btnToggleUI" title="Cài đặt">⚙️</button>
+        <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
     </div>
 
     <div class="nav-bar glass-panel" id="navBar">
@@ -151,7 +142,7 @@
         <a href="dongho.html" class="active">Đồng Hồ</a>
     </div>
 
-    <div class="control-panel" id="controlPanel">
+    <div class="control-panel glass-panel" id="controlPanel">
         
         <div class="mode-selector-menu" id="modeMenu">
             <div class="mode-option active" data-mode="realtime">Giờ Thực Tế</div>
@@ -164,19 +155,19 @@
         </div>
 
         <div class="control-group" id="actionControls" style="display: none; padding-top:10px; border-top: 1px solid var(--glass-border);">
-            <button class="btn-action" id="btnStart" onclick="startCountdown()">▶ Bắt Đầu [SPACE]</button>
+            <button class="btn-action" id="btnStart" onclick="startCountdown()">▶ BẮT ĐẦU [SPACE]</button>
             <button class="btn-action" id="btnPause" onclick="pauseCountdown()">TẠM DỪNG</button>
             <button class="btn-action" id="btnReset" onclick="resetCountdown()">ĐẶT LẠI</button>
         </div>
     </div>
 
-    <div class="board" id="mainBoard">
+    <div class="board glass-panel" id="mainBoard">
         <div id="clockDisplay" class="digital-clock">00:00:00</div>
         <div class="time-up" id="timeUpMsg"></div>
     </div>
     
     <div class="footer-copyleft" id="footerCopy">
-        Phát triển bởi <a href="https://www.facebook.com/link-facebook-cua-ban" target="_blank">PDT and Friends</a> | 
+        Phát triển bởi <a href="https://www.facebook.com/pdtandfriends" target="_blank">PDT and Friends</a> | 
         Giấy phép <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>
     </div>
 
@@ -188,59 +179,31 @@
         let wakeLock = null;
         async function keepScreenAwake() { try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
         function allowScreenSleep() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
+        document.addEventListener('click', () => { if (mode === 'realtime' || isRunning) keepScreenAwake(); }, { once: true });
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (isRunning || mode === 'realtime')) keepScreenAwake(); });
 
-        // --- KÉO THẢ BONG BÓNG ---
-        const floatingMenu = document.getElementById('floatingMenu');
-        const dragHandle = document.getElementById('dragHandle');
-        const btnCollapseBubble = document.getElementById('btnCollapseBubble');
-        let isDragging = false, dragStartX, dragStartY;
-
-        btnCollapseBubble.addEventListener('click', () => {
-            floatingMenu.classList.toggle('collapsed');
-            btnCollapseBubble.textContent = floatingMenu.classList.contains('collapsed') ? '▶' : '◀';
-        });
-
-        function dragStart(e) {
-            if (e.target === dragHandle || dragHandle.contains(e.target)) {
-                isDragging = true;
-                dragStartX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-                dragStartY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-                floatingMenu.style.transition = 'none';
-            }
-        }
-        function drag(e) {
-            if (!isDragging) return; e.preventDefault();
-            let dx = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - dragStartX;
-            let dy = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - dragStartY;
-            requestAnimationFrame(() => floatingMenu.style.transform = `translate3d(${dx}px, ${dy}px, 0)`);
-        }
-        function dragEnd() {
-            if (!isDragging) return; isDragging = false;
-            const rect = floatingMenu.getBoundingClientRect();
-            floatingMenu.style.transform = 'none'; floatingMenu.style.transition = 'transform 0.1s ease-out';
-            floatingMenu.style.top = Math.max(0, Math.min(rect.top, window.innerHeight - rect.height)) + 'px';
-            if (rect.left + rect.width / 2 > window.innerWidth / 2) {
-                floatingMenu.style.left = 'auto'; floatingMenu.style.right = Math.max(0, window.innerWidth - rect.right) + 'px';
-            } else {
-                floatingMenu.style.right = 'auto'; floatingMenu.style.left = Math.max(0, rect.left) + 'px';
-            }
-        }
-        floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
-        document.addEventListener("touchmove", drag, { passive: false });
-        document.addEventListener("touchend", dragEnd);
-        floatingMenu.addEventListener("mousedown", dragStart);
-        document.addEventListener("mousemove", drag);
-        document.addEventListener("mouseup", dragEnd);
-
-        // --- NÚT GIAO DIỆN CHUNG ---
-        const navBar = document.getElementById('navBar'); const controlPanel = document.getElementById('controlPanel');
-        const boardEl = document.getElementById('mainBoard'); const footerCopy = document.getElementById('footerCopy');
+        // --- CÁC NÚT GIAO DIỆN CHUNG ---
+        const navBar = document.getElementById('navBar'); 
+        const controlPanel = document.getElementById('controlPanel');
+        const boardEl = document.getElementById('mainBoard'); 
+        const footerCopy = document.getElementById('footerCopy');
         let currentScale = 1;
 
-        document.getElementById('btnToggleUI').addEventListener('click', () => { navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden'); });
-        document.getElementById('btnFullscreen').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); });
-        document.getElementById('btnToggleBoard').addEventListener('click', () => { boardEl.classList.toggle('minimal'); });
+        document.getElementById('btnToggleUI').addEventListener('click', () => { 
+            navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden'); 
+        });
+        document.getElementById('btnFullscreen').addEventListener('click', () => { 
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); 
+        });
+        document.getElementById('btnToggleBoard').addEventListener('click', () => { 
+            boardEl.classList.toggle('minimal'); 
+            const iconBoard = document.getElementById('iconBoard');
+            if(boardEl.classList.contains('minimal')){
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>';
+            } else {
+                iconBoard.innerHTML = '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/>';
+            }
+        });
         document.getElementById('btnZoomIn').addEventListener('click', () => { if (currentScale < 2.5) { currentScale += 0.1; boardEl.style.transform = `scale(${currentScale})`; } });
         document.getElementById('btnZoomOut').addEventListener('click', () => { if (currentScale > 0.4) { currentScale -= 0.1; boardEl.style.transform = `scale(${currentScale})`; } });
 
@@ -256,6 +219,7 @@
         const pomodoroControls = document.getElementById('pomodoroControls');
         const actionControls = document.getElementById('actionControls');
         const btnStart = document.getElementById('btnStart');
+        const btnPause = document.getElementById('btnPause');
         const timeUpMsg = document.getElementById('timeUpMsg');
 
         // Phím Space Bắt đầu
@@ -321,8 +285,9 @@
             
             keepScreenAwake();
             isRunning = true; isPaused = false;
-            btnStart.style.display = 'none'; document.getElementById('btnPause').style.display = 'block';
+            btnStart.style.display = 'none'; btnPause.style.display = 'block';
             timeUpMsg.style.display = 'none';
+            timeUpMsg.classList.remove('break-mode');
 
             countdownInterval = setInterval(() => {
                 totalSeconds--;
@@ -330,6 +295,7 @@
                 
                 if (totalSeconds <= 0) {
                     playAlarm();
+                    
                     isPomoWorkSession = !isPomoWorkSession;
                     totalSeconds = getInitialSeconds(); 
                     updateDisplay(totalSeconds);
@@ -349,15 +315,15 @@
 
         function pauseCountdown() {
             clearInterval(countdownInterval); isPaused = true; allowScreenSleep();
-            btnStart.style.display = 'block'; btnStart.textContent = 'TIẾP TỤC [SPACE]'; document.getElementById('btnPause').style.display = 'none';
+            btnStart.style.display = 'block'; btnStart.textContent = 'TIẾP TỤC [SPACE]'; btnPause.style.display = 'none';
         }
 
         function resetCountdown() {
-            if (isRunning && !confirm("Bạn có chắc chắn muốn đặt lại không?")) return;
+            if (isRunning && !confirm("Đang chạy Pomodoro! Bạn có chắc chắn muốn đặt lại không?")) return;
             clearInterval(countdownInterval);
             isRunning = false; isPaused = false; isPomoWorkSession = true; 
             allowScreenSleep();
-            btnStart.style.display = 'block'; btnStart.textContent = 'BẮT ĐẦU [SPACE]'; document.getElementById('btnPause').style.display = 'none';
+            btnStart.style.display = 'block'; btnStart.textContent = '▶ BẮT ĐẦU [SPACE]'; btnPause.style.display = 'none';
             timeUpMsg.style.display = 'none';
             if (mode === 'pomodoro') {
                 totalSeconds = getInitialSeconds();
@@ -380,8 +346,7 @@
         }
 
         window.addEventListener('beforeunload', e => { if (isRunning) { e.preventDefault(); e.returnValue = ''; }});
-        startRealtime();
+        startRealtime(); // Mặc định chạy giờ thực
     </script>
 </body>
 </html>
-
