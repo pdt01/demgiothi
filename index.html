@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đếm giờ thi</title>
     <style>
-        /* CSS VARIABLES: PURE LIQUID GLASS */
+        /* CSS VARIABLES: LIQUID GLASS & GLOW */
         :root {
             --bg-liquid: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             --glass-bg: rgba(255, 255, 255, 0.4);
@@ -13,9 +13,8 @@
             --text-main: #2c3e50;
             --slash-color: rgba(241, 196, 15, 0.8); 
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            --glow-color: rgba(255, 255, 255, 0.5); 
-            --active-bg: #2c3e50;
-            --active-text: #ffffff;
+            --glow-color: rgba(255, 255, 255, 0.7); 
+            --accent-glow: rgba(44, 62, 80, 0.4);
         }
 
         body.dark-theme {
@@ -25,9 +24,8 @@
             --text-main: #ecf0f1;
             --slash-color: rgba(243, 156, 18, 0.7); 
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            --glow-color: rgba(142, 197, 252, 0.25); 
-            --active-bg: #ecf0f1;
-            --active-text: #2c3e50;
+            --glow-color: rgba(142, 197, 252, 0.4); 
+            --accent-glow: rgba(142, 197, 252, 0.6);
         }
 
         body {
@@ -39,7 +37,7 @@
 
         .hidden { display: none !important; }
 
-        /* BONG BÓNG MENU (Gộp tất cả) */
+        /* BONG BÓNG MENU */
         .floating-bubble {
             position: fixed; top: 20px; right: 20px; background: rgba(44, 62, 80, 0.9);
             backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.2);
@@ -57,9 +55,8 @@
             justify-content: center; cursor: pointer; transition: 0.2s; outline: none; font-weight: bold; flex-shrink: 0;
         }
         .floating-bubble button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 300px; transition: max-width 0.3s ease, opacity 0.3s ease; }
+        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 250px; transition: max-width 0.3s ease, opacity 0.3s ease; }
         .floating-bubble.collapsed .bubble-actions { max-width: 0; opacity: 0; pointer-events: none; }
-        .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* Thanh điều hướng */
         .nav-bar { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 200; border-radius: 20px; overflow: hidden; }
@@ -75,21 +72,36 @@
         }
         .control-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
 
-        .preset-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); margin-bottom: 5px; }
-        .btn-preset { background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border); color: var(--text-main); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* MẪU THI (PRESETS) */
+        .preset-group {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+            padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); margin-bottom: 5px;
+        }
+        .btn-preset {
+            background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         body.dark-theme .btn-preset { background: rgba(255,255,255,0.05); }
         .btn-preset:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
         body.dark-theme .btn-preset:hover { background: rgba(255,255,255,0.2); }
 
         label { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        input[type="time"], input[type="number"], select { padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; background: rgba(255,255,255,0.2); color: var(--text-main); font-weight: 600; outline: none; }
+        input[type="time"], input[type="number"], select { 
+            padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; 
+            background: rgba(255,255,255,0.2); color: var(--text-main); font-weight: 600; outline: none;
+        }
         body.dark-theme input, body.dark-theme select { background: rgba(0,0,0,0.3); }
         input[type="text"] { width: 120px; font-family: monospace; }
         
-        .btn-icon-sound { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 5px; transition: transform 0.2s; outline: none; }
+        .btn-icon-sound {
+            background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 5px; 
+            transition: transform 0.2s; outline: none;
+        }
         .btn-icon-sound:hover { transform: scale(1.2); }
 
-        .btn-apply-inline { background: #3498db; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 10px; }
+        .btn-apply-inline {
+            background: #3498db; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 10px;
+        }
         .btn-apply-inline:hover { background: #2980b9; transform: translateY(-1px); }
 
         .btn-group { display: flex; gap: 20px; justify-content: center; padding-top: 15px; margin-top: 10px; border-top: 1px solid var(--glass-border); }
@@ -104,34 +116,42 @@
         .board {
             background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border); border-radius: 24px; 
-            padding: 80px 50px 60px 50px; /* Thêm padding top để nhường chỗ cho menu */
+            padding: 80px 50px 60px 50px; 
             width: 85%; max-width: 1100px; min-height: 350px;
             box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: auto 0;
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
-        .board.minimal { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
 
-        /* MENU CHỌN ĐỒNG HỒ TRÊN BẢNG */
-        .clock-selector-menu {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 5px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-            padding: 6px; border-radius: 30px; border: 1px solid var(--glass-border); z-index: 100;
+        /* MENU CHỌN ĐỒNG HỒ (TÀNG HÌNH & HIỆN KHI HOVER) */
+        .clocks-container {
+            position: relative; padding: 30px; display: flex; justify-content: center; align-items: center; width: 100%;
         }
-        body.dark-theme .clock-selector-menu { background: rgba(0,0,0,0.2); }
         
+        .clock-selector-menu {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%) translateY(10px);
+            opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; gap: 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            padding: 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
+            z-index: 100;
+        }
+        /* Chỉ hiện menu khi hover vào vùng chứa đồng hồ */
+        .clocks-container:hover .clock-selector-menu {
+            opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+        }
+
         .clock-option {
-            padding: 8px 25px; border-radius: 20px; font-weight: bold; font-size: 1rem; color: var(--text-main);
+            padding: 10px 25px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; color: var(--text-main);
             cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
         }
-        .clock-option:hover { background: rgba(255,255,255,0.3); }
-        body.dark-theme .clock-option:hover { background: rgba(0,0,0,0.4); }
+        .clock-option:hover { background: rgba(0,0,0,0.1); color: var(--text-main); }
+        body.dark-theme .clock-option:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .clock-option.active { background: var(--active-bg); color: var(--active-text); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
         .clocks-wrapper { display: flex; align-items: center; gap: 50px; }
 
-        /* --- ĐỒNG HỒ KIM: DỊU NHẸ, FULL MẶT PHẲNG --- */
+        /* ĐỒNG HỒ KIM GLOWING */
         .analog-clock { 
-            width: 220px; height: 220px; border: 4px solid var(--text-main); border-radius: 50%; position: relative; 
+            width: 220px; height: 220px; border: 6px solid var(--text-main); border-radius: 50%; position: relative; 
             /* Nền mặt đồng hồ trong trẻo */
             background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
             /* Vòng sáng nhẹ nhàng */
@@ -144,44 +164,46 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%);
             border-radius: 50%; pointer-events: none;
         }
-        .analog-clock::before { content: ''; position: absolute; width: 14px; height: 14px; background: var(--text-main); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 8px var(--text-main); }
-        .clock-number { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px; color: var(--text-main); font-family: -apple-system, sans-serif; font-size: 1.5rem; font-weight: 600; z-index: 5; text-shadow: 0 0 5px var(--glow-color); }
+        .analog-clock::before { content: ''; position: absolute; width: 16px; height: 16px; background: var(--text-main); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 8px var(--text-main); }
+        .clock-number { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px; color: var(--text-main); font-family: -apple-system, sans-serif; font-size: 1.6rem; font-weight: bold; z-index: 5; text-shadow: 0 0 8px var(--glow-color); }
         .hand { position: absolute; bottom: 50%; transform-origin: bottom center; background: var(--text-main); border-radius: 10px; box-shadow: 0 0 5px var(--glow-color); }
-        .hour-hand { width: 6px; height: 55px; left: calc(50% - 3px); z-index: 10; }
-        .minute-hand { width: 4px; height: 85px; left: calc(50% - 2px); opacity: 0.8; z-index: 11; }
-        .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #ff4757; box-shadow: 0 0 8px #ff4757; z-index: 12; }
+        .hour-hand { width: 8px; height: 55px; left: calc(50% - 4px); z-index: 10; }
+        .minute-hand { width: 5px; height: 85px; left: calc(50% - 2.5px); opacity: 0.8; z-index: 11; }
+        .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #ff4757; box-shadow: 0 0 10px #ff4757; z-index: 12; }
 
         /* ĐỒNG HỒ SỐ */
-        .digital-clock { font-family: -apple-system, sans-serif; font-size: 6.5rem; font-weight: bold; color: var(--text-main); display: none; letter-spacing: -2px; text-shadow: 0 0 15px var(--glow-color), 0 0 30px var(--accent-glow); }
+        .digital-clock { font-family: -apple-system, sans-serif; font-size: 6.5rem; font-weight: bold; color: var(--text-main); display: none; letter-spacing: -2px; text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--accent-glow); }
 
         /* TRỤC THỜI GIAN */
         .timeline-container { position: relative; width: 100%; margin-top: 20px; display: block; }
-        .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: -apple-system, sans-serif; font-weight: bold; color: var(--text-main); text-shadow: 0 0 8px var(--glow-color); }
+        .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: -apple-system, sans-serif; font-weight: bold; color: var(--text-main); text-shadow: 0 0 10px var(--glow-color); }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
-        .timeline-track { position: relative; display: flex; width: 100%; height: 5px; background-color: var(--text-main); border-radius: 3px; box-shadow: 0 0 10px var(--glow-color); }
-        .timeline-track::after { content: ''; position: absolute; right: -22px; top: -9px; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 24px solid var(--text-main); transition: all 0.3s ease; filter: drop-shadow(0 0 5px var(--glow-color)); }
+        .timeline-track { position: relative; display: flex; width: 100%; height: 6px; background-color: var(--text-main); border-radius: 3px; box-shadow: 0 0 12px var(--glow-color); }
+        .timeline-track::after { content: ''; position: absolute; right: -22px; top: -9px; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 24px solid var(--text-main); transition: all 0.3s ease; filter: drop-shadow(0 0 8px var(--glow-color)); }
         
         .running .timeline-track::after { border-left-color: #ff4757; animation: blink 1.5s infinite; filter: drop-shadow(0 0 10px #ff4757); }
         @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.95); } }
 
         .segment { flex: 1; position: relative; }
-        .segment::before, .segment:last-child::after { content: ''; position: absolute; top: -12px; width: 3px; height: 30px; background-color: var(--text-main); border-radius: 2px; box-shadow: 0 0 5px var(--glow-color); }
+        .segment::before, .segment:last-child::after { content: ''; position: absolute; top: -12px; width: 4px; height: 30px; background-color: var(--text-main); border-radius: 2px; box-shadow: 0 0 8px var(--glow-color); }
         .segment::before { left: 0; } .segment:last-child::after { right: 0; }
-        .tick-label { position: absolute; bottom: -45px; right: -2px; transform: translateX(50%); font-family: -apple-system, sans-serif; font-size: 1.5rem; font-weight: bold; color: var(--text-main); text-shadow: 0 0 5px var(--glow-color); }
+        .tick-label { position: absolute; bottom: -45px; right: -2px; transform: translateX(50%); font-family: -apple-system, sans-serif; font-size: 1.5rem; font-weight: bold; color: var(--text-main); text-shadow: 0 0 8px var(--glow-color); }
 
         /* Gạch chéo màu vàng nhạt mặc định */
         .slash-nhieunet { position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%); background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 12px); display: none; z-index: 10; }
         .crossed .slash-nhieunet { display: block; }
 
-        .time-up { display: none; position: absolute; bottom: 30px; right: 40px; font-size: 4rem; color: #ff4757; font-weight: bold; transform: rotate(-5deg); z-index: 50; text-shadow: 0 5px 20px rgba(255, 71, 87, 0.4); }
+        .time-up { display: none; position: absolute; bottom: 30px; right: 40px; font-size: 4rem; color: #ff4757; font-weight: bold; transform: rotate(-5deg); z-index: 50; text-shadow: 0 5px 20px rgba(255, 71, 87, 0.6); }
         
+        svg { width: 18px; height: 18px; fill: currentColor; }
+
         .footer-copyleft { margin-top: 20px; font-size: 12px; text-align: center; opacity: 0.8; line-height: 1.5; font-weight: 500; }
         .footer-copyleft a { color: var(--text-main); text-decoration: underline; font-weight: bold; }
 
         @media (max-width: 600px) {
-            .board { padding: 80px 20px 40px 20px; width: 95%; }
+            .board { padding: 40px 20px; width: 95%; }
             .digital-clock { font-size: 4rem; }
             .time-label { font-size: 1.5rem; top: -45px; }
             .tick-label { font-size: 1.2rem; bottom: -30px; }
@@ -191,6 +213,7 @@
             .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; }
             .btn-group { flex-direction: column; }
             .clock-option { padding: 6px 15px; font-size: 0.9rem; }
+            .clocks-container { padding: 15px; }
         }
     </style>
 </head>
@@ -198,14 +221,11 @@
 
     <div class="floating-bubble" id="floatingMenu">
         <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
         </div>
         <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
         <div class="bubble-actions" id="bubbleActions">
             <button id="btnThemeToggle" title="Giao diện Sáng/Tối">🌗</button>
-            <button id="btnToggleBoard" title="Ẩn nền bảng">
-                <svg class="svg-icon" id="iconBoard" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M14.59 8L12 10.59 9.41 8 8 9.41 10.59 12 8 14.59 9.41 16 12 13.41 14.59 16 16 14.59 13.41 12 16 9.41 14.59 8z"/></svg>
-            </button>
             <button id="btnToggleUI" title="Cài đặt">⚙️</button>
             <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
         </div>
@@ -217,6 +237,7 @@
     </div>
 
     <div class="control-panel" id="controlPanel">
+        
         <div class="preset-group">
             <span style="font-size: 14px; font-weight: bold; margin-right: 5px;">Mẫu thi nhanh:</span>
             <button class="btn-preset" onclick="applyPreset(120, 30, '30, 60, 90')">Văn (120p)</button>
@@ -235,7 +256,7 @@
                 <option value="clock" selected>Giờ thực (9h00)</option>
             </select>
             <button id="btnToggleSound" class="btn-icon-sound" title="Bật/Tắt Âm thanh">🔔</button>
-            <button class="btn-apply-inline" id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
+            <button class="btn-apply-inline" id="btnApply" onclick="applySettings()">Áp Dụng</button>
         </div>
         <div class="helper-text">* Vui lòng nhấn "Áp dụng" ngay sau khi thay đổi thông số.</div>
 
@@ -246,20 +267,22 @@
     </div>
 
     <div class="board" id="mainBoard">
-        
-        <div class="clock-selector-menu" id="clockMenu">
-            <div class="clock-option active" data-type="analog">Kim</div>
-            <div class="clock-option" data-type="digital">Số</div>
-            <div class="clock-option" data-type="none">Ẩn</div>
-        </div>
 
-        <div class="clocks-wrapper">
-            <div id="analogClock" class="analog-clock">
-                <div class="hand hour-hand" id="hourHand"></div>
-                <div class="hand minute-hand" id="minuteHand"></div>
-                <div class="hand second-hand" id="secondHand"></div>
+        <div class="clocks-container">
+            <div class="clock-selector-menu" id="clockMenu">
+                <div class="clock-option active" data-type="analog">Kim</div>
+                <div class="clock-option" data-type="digital">Số</div>
+                <div class="clock-option" data-type="none">Ẩn</div>
             </div>
-            <div id="digitalClock" class="digital-clock">0:00:00</div>
+
+            <div class="clocks-wrapper">
+                <div id="analogClock" class="analog-clock">
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
+                </div>
+                <div id="digitalClock" class="digital-clock">0:00:00</div>
+            </div>
         </div>
 
         <div class="timeline-container" id="timelineContainer">
@@ -277,10 +300,11 @@
     </div>
 
     <script>
+        // --- CHUYỂN ĐỔI THEME SÁNG / TỐI ---
         const btnThemeToggle = document.getElementById('btnThemeToggle');
         btnThemeToggle.addEventListener('click', () => { document.body.classList.toggle('dark-theme'); });
 
-        // --- PRESETS ---
+        // --- MẪU THI (PRESETS) ---
         function applyPreset(duration, interval, labels) {
             if (isRunning && !confirm("Đồng hồ đang chạy! Đặt lại để áp dụng mẫu thi mới?")) return;
             document.getElementById('durationTime').value = duration;
@@ -298,7 +322,7 @@
             btnToggleSound.style.opacity = soundEnabled ? '1' : '0.5';
         });
 
-        // --- MENU CHỌN ĐỒNG HỒ ---
+        // --- MENU CHỌN ĐỒNG HỒ (HOVER) ---
         let currentClockType = 'analog'; 
         const clockOptions = document.querySelectorAll('.clock-option');
         clockOptions.forEach(opt => {
@@ -315,7 +339,7 @@
             document.getElementById('analogClock').style.display = (currentClockType === 'analog') ? 'block' : 'none';
         };
 
-        // --- BONG BÓNG MENU ---
+        // --- BONG BÓNG KÉO THẢ ---
         const floatingMenu = document.getElementById('floatingMenu');
         const dragHandle = document.getElementById('dragHandle');
         const btnCollapseBubble = document.getElementById('btnCollapseBubble');
@@ -358,13 +382,13 @@
         const navBar = document.getElementById('navBar'); const controlPanel = document.getElementById('controlPanel');
         const boardEl = document.getElementById('mainBoard'); const footerCopy = document.getElementById('footerCopy');
         
-        document.getElementById('btnToggleUI').addEventListener('click', () => { navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden'); });
-        document.getElementById('btnFullscreen').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); });
-        document.getElementById('btnToggleBoard').addEventListener('click', () => {
-            boardEl.classList.toggle('minimal');
-            document.getElementById('btnToggleBoard').innerHTML = boardEl.classList.contains('minimal') ? '☐' : '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>';
-        });
+        const toggleUIfunc = () => { navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden'); };
+        document.getElementById('btnToggleUI').addEventListener('click', toggleUIfunc);
 
+        const toggleFullscreenFunc = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); };
+        document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreenFunc);
+
+        // --- WAKE LOCK API (Chống tắt màn hình) ---
         let wakeLock = null;
         async function keepScreenAwake() { try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
         function allowScreenSleep() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
