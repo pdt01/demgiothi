@@ -36,7 +36,7 @@
 
         .hidden { display: none !important; }
 
-        /* BONG BÓNG MENU (Gộp các nút công cụ) */
+        /* BONG BÓNG MENU TỐI ƯU */
         .floating-bubble {
             position: fixed; top: 20px; right: 20px; background: rgba(44, 62, 80, 0.9);
             backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.2);
@@ -45,7 +45,10 @@
             user-select: none; touch-action: none; transition: background 0.3s ease;
         }
 
-        .drag-handle { color: rgba(255, 255, 255, 0.6); cursor: grab; padding: 5px; display: flex; align-items: center; justify-content: center; width: 24px; }
+        .drag-handle {
+            color: rgba(255, 255, 255, 0.6); cursor: grab; padding: 5px;
+            display: flex; align-items: center; justify-content: center; width: 24px;
+        }
         .drag-handle:active { cursor: grabbing; }
 
         .floating-bubble button {
@@ -55,53 +58,31 @@
             cursor: pointer; transition: 0.2s; outline: none; font-weight: bold; flex-shrink: 0;
         }
         .floating-bubble button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 350px; transition: max-width 0.3s ease, opacity 0.3s ease; }
+
+        .bubble-actions {
+            display: flex; gap: 8px; overflow: hidden; max-width: 350px; transition: max-width 0.3s ease, opacity 0.3s ease;
+        }
         .floating-bubble.collapsed .bubble-actions { max-width: 0; opacity: 0; pointer-events: none; }
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* Thanh điều hướng */
         .nav-bar { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 200; border-radius: 20px; overflow: hidden; }
-        .nav-bar a { color: var(--text-main); text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; background: transparent; }
-        .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.25); }
+        .nav-bar a { color: var(--text-main); text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; background: transparent; border: none; }
+        .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.25); box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
         body.dark-theme .nav-bar a:hover, body.dark-theme .nav-bar a.active { background: rgba(255,255,255,0.15); }
 
         /* Bảng điều khiển */
         .control-panel {
             background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border);
-            padding: 20px; border-radius: 20px; margin-top: 50px; margin-bottom: 25px;
-            display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 600px; z-index: 100; box-shadow: var(--shadow);
+            padding: 20px; border-radius: 24px; margin-top: 50px; margin-bottom: 25px;
+            display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 650px; z-index: 100; box-shadow: var(--shadow);
         }
 
-        .control-group { display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; }
-        label { font-weight: 600; font-size: 14px; }
-        input[type="number"] { padding: 6px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; width: 60px; background: rgba(255,255,255,0.2); color: var(--text-main); font-weight: bold; outline: none; }
-        body.dark-theme input[type="number"] { background: rgba(0,0,0,0.3); }
-
-        button.btn-action {
-            background: rgba(255,255,255,0.25); color: var(--text-main); border: 1px solid var(--glass-border);
-            padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s;
-        }
-        body.dark-theme button.btn-action { background: rgba(255,255,255,0.1); }
-        button.btn-action:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); }
-        #btnStart { background: rgba(39, 174, 96, 0.9); color: white; border: none; }
-        #btnPause { background: rgba(243, 156, 18, 0.9); color: white; border: none; display: none; }
-        #btnReset { background: rgba(231, 76, 60, 0.9); color: white; border: none; }
-
-        /* --- BẢNG HIỂN THỊ CHÍNH (Kính mờ bo góc) --- */
-        .board {
-            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 80px 20px 40px 20px;
-            width: 85%; max-width: 800px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin: auto 0;
-            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            transform-origin: center center; box-shadow: var(--shadow);
-        }
-        .board.minimal { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
-
-        /* MENU CHỌN CHẾ ĐỘ ĐỒNG HỒ CỐ ĐỊNH TRONG BẢNG */
+        /* MENU CHỌN CHẾ ĐỘ ĐỒNG HỒ NẰM TRONG CÀI ĐẶT */
         .mode-selector-menu {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 5px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-            padding: 6px; border-radius: 30px; border: 1px solid var(--glass-border); z-index: 100;
+            padding: 6px; border-radius: 30px; border: 1px solid var(--glass-border);
+            margin: 0 auto 5px auto; width: fit-content; justify-content: center;
         }
         body.dark-theme .mode-selector-menu { background: rgba(0,0,0,0.2); }
         
@@ -113,6 +94,31 @@
         body.dark-theme .mode-option:hover { background: rgba(0,0,0,0.4); }
         .mode-option.active { background: var(--active-bg); color: var(--active-text); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
+        .control-group { display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; }
+        label { font-weight: 600; font-size: 14px; }
+        input[type="number"] { padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; width: 60px; background: rgba(255,255,255,0.2); color: var(--text-main); font-weight: bold; outline: none; }
+        body.dark-theme input[type="number"] { background: rgba(0,0,0,0.3); }
+
+        button.btn-action {
+            background: rgba(255,255,255,0.25); color: var(--text-main); border: 1px solid var(--glass-border);
+            padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); letter-spacing: 1px;
+        }
+        body.dark-theme button.btn-action { background: rgba(255,255,255,0.1); }
+        button.btn-action:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        #btnStart { background: rgba(39, 174, 96, 0.9); color: white; }
+        #btnPause { background: rgba(243, 156, 18, 0.9); color: white; display: none; }
+        #btnReset { background: rgba(231, 76, 60, 0.9); color: white; }
+
+        /* --- BẢNG HIỂN THỊ CHÍNH (Kính mờ bo góc trống trải) --- */
+        .board {
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 60px 50px;
+            width: 85%; max-width: 800px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin: auto 0;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform-origin: center center; box-shadow: var(--shadow);
+        }
+        .board.minimal { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
+
         .digital-clock { font-family: -apple-system, sans-serif; font-size: 10rem; font-weight: bold; color: var(--text-main); letter-spacing: -3px; text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--accent-glow); }
 
         .time-up { display: none; position: absolute; bottom: 30px; font-size: 2.5rem; color: #e74c3c; font-weight: bold; text-transform: uppercase; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
@@ -123,7 +129,7 @@
 
         @media (max-width: 600px) {
             .digital-clock { font-size: 5rem; }
-            .board { min-height: 250px; width: 95%; padding-top: 70px; }
+            .board { min-height: 250px; width: 95%; padding: 40px 20px; }
             .mode-option { padding: 6px 12px; font-size: 0.8rem; }
         }
     </style>
@@ -158,6 +164,12 @@
 
     <div class="control-panel" id="controlPanel">
         
+        <div class="mode-selector-menu" id="modeMenu">
+            <div class="mode-option active" data-mode="realtime">Giờ Thực Tế</div>
+            <div class="mode-option" data-mode="countdown">Đếm Ngược</div>
+            <div class="mode-option" data-mode="pomodoro">Pomodoro</div>
+        </div>
+        
         <div class="control-group" id="countdownControls" style="display: none;">
             <label>Số phút đếm ngược: <input type="number" id="cdMinutes" value="25" min="1"></label>
         </div>
@@ -168,19 +180,13 @@
         </div>
 
         <div class="control-group" id="actionControls" style="display: none; padding-top:10px; border-top: 1px solid var(--glass-border);">
-            <button class="btn-action" id="btnStart" onclick="startCountdown()">▶ Bắt Đầu [SPACE]</button>
-            <button class="btn-action" id="btnPause" onclick="pauseCountdown()">⏸ Tạm Dừng</button>
-            <button class="btn-action" id="btnReset" onclick="resetCountdown()">⏹ Đặt Lại</button>
+            <button class="btn-action" id="btnStart" onclick="startCountdown()">BẮT ĐẦU [SPACE]</button>
+            <button class="btn-action" id="btnPause" onclick="pauseCountdown()">TẠM DỪNG</button>
+            <button class="btn-action" id="btnReset" onclick="resetCountdown()">ĐẶT LẠI</button>
         </div>
     </div>
 
     <div class="board" id="mainBoard">
-        <div class="mode-selector-menu" id="modeMenu">
-            <div class="mode-option active" data-mode="realtime">Giờ Thực Tế</div>
-            <div class="mode-option" data-mode="countdown">Đếm Ngược</div>
-            <div class="mode-option" data-mode="pomodoro">Pomodoro</div>
-        </div>
-
         <div id="clockDisplay" class="digital-clock">00:00:00</div>
         <div class="time-up" id="timeUpMsg"></div>
     </div>
@@ -237,8 +243,12 @@
                 floatingMenu.style.right = 'auto'; floatingMenu.style.left = Math.max(0, rect.left) + 'px';
             }
         }
-        floatingMenu.addEventListener("touchstart", dragStart, { passive: false }); document.addEventListener("touchmove", drag, { passive: false }); document.addEventListener("touchend", dragEnd);
-        floatingMenu.addEventListener("mousedown", dragStart); document.addEventListener("mousemove", drag); document.addEventListener("mouseup", dragEnd);
+        floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
+        document.addEventListener("touchmove", drag, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+        floatingMenu.addEventListener("mousedown", dragStart);
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("mouseup", dragEnd);
 
         // --- NÚT GIAO DIỆN CHUNG ---
         const navBar = document.getElementById('navBar'); const controlPanel = document.getElementById('controlPanel');
@@ -249,7 +259,6 @@
         document.getElementById('btnFullscreen').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); });
         document.getElementById('btnToggleBoard').addEventListener('click', () => {
             boardEl.classList.toggle('minimal');
-            document.getElementById('btnToggleBoard').innerHTML = boardEl.classList.contains('minimal') ? '☐' : '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>';
         });
         document.getElementById('btnZoomIn').addEventListener('click', () => { if (currentScale < 2.5) { currentScale += 0.1; boardEl.style.transform = `scale(${currentScale})`; } });
         document.getElementById('btnZoomOut').addEventListener('click', () => { if (currentScale > 0.4) { currentScale -= 0.1; boardEl.style.transform = `scale(${currentScale})`; } });
@@ -269,6 +278,14 @@
         const btnStart = document.getElementById('btnStart');
         const btnPause = document.getElementById('btnPause');
         const timeUpMsg = document.getElementById('timeUpMsg');
+
+        // Phím Space Bắt đầu
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                e.preventDefault(); 
+                if (mode !== 'realtime' && !isRunning) startCountdown();
+            }
+        });
 
         // Menu Chọn Chế độ
         const modeOptions = document.querySelectorAll('.mode-option');
@@ -293,14 +310,6 @@
                     allowScreenSleep();
                 }
             });
-        });
-
-        // Phím Space Bắt đầu
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
-                e.preventDefault(); 
-                if (mode !== 'realtime' && !isRunning) startCountdown();
-            }
         });
 
         function formatTime(s) {
@@ -379,7 +388,7 @@
 
         function pauseCountdown() {
             clearInterval(countdownInterval); isPaused = true; allowScreenSleep();
-            btnStart.style.display = 'block'; btnStart.textContent = '▶ Tiếp Tục [SPACE]'; btnPause.style.display = 'none';
+            btnStart.style.display = 'block'; btnStart.textContent = 'TIẾP TỤC [SPACE]'; btnPause.style.display = 'none';
         }
 
         function resetCountdown() {
@@ -387,7 +396,7 @@
             clearInterval(countdownInterval);
             isRunning = false; isPaused = false; isPomoWorkSession = true; 
             allowScreenSleep();
-            btnStart.style.display = 'block'; btnStart.textContent = '▶ Bắt Đầu [SPACE]'; btnPause.style.display = 'none';
+            btnStart.style.display = 'block'; btnStart.textContent = 'BẮT ĐẦU [SPACE]'; btnPause.style.display = 'none';
             timeUpMsg.style.display = 'none';
             totalSeconds = getInitialSeconds();
             updateDisplay(totalSeconds);
