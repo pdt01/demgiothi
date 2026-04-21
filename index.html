@@ -5,182 +5,212 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đếm giờ thi</title>
     <style>
-        /* CSS VARIABLES: CHUẨN APPLE LIQUID GLASS */
+        /* CSS VARIABLES: LIQUID GLASS & GLOW */
         :root {
-            --bg-liquid: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); /* Nền sáng dịu */
+            --bg-liquid: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             --glass-bg: rgba(255, 255, 255, 0.4);
             --glass-border: rgba(255, 255, 255, 0.6);
             --text-main: #2c3e50;
-            --slash-color: #e74c3c;
-            --board-width: 85%;
-            --board-min-height: 350px;
+            /* Màu vàng dịu nhẹ cho vạch chéo */
+            --slash-color: rgba(241, 196, 15, 0.8); 
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --glow-color: rgba(255, 255, 255, 0.7); 
+            --accent-glow: rgba(44, 62, 80, 0.4);
         }
 
         body.dark-theme {
-            --bg-liquid: linear-gradient(135deg, #141e30 0%, #243b55 100%); /* Nền tối sâu thẳm */
+            --bg-liquid: linear-gradient(135deg, #141e30 0%, #243b55 100%);
             --glass-bg: rgba(0, 0, 0, 0.35);
             --glass-border: rgba(255, 255, 255, 0.15);
             --text-main: #ecf0f1;
+            --slash-color: rgba(243, 156, 18, 0.7); /* Vàng sậm hơn chút cho nền tối */
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            --glow-color: rgba(142, 197, 252, 0.4); 
+            --accent-glow: rgba(142, 197, 252, 0.6);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-liquid);
-            background-attachment: fixed;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; 
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-            transition: background 0.5s ease, color 0.5s ease;
-        }
-
-        /* CLASS HIỆU ỨNG KÍNH (Dùng chung) */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
+            background: var(--bg-liquid); background-attachment: fixed; color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 20px; margin: 0; min-height: 100vh; overflow-x: hidden; transition: background 0.5s ease, color 0.5s ease;
         }
 
         .hidden { display: none !important; }
 
-        /* --- BONG BÓNG MENU --- */
+        /* BONG BÓNG MENU */
         .floating-bubble {
-            position: fixed; top: 20px; right: 20px; 
+            position: fixed; top: 20px; right: 20px; background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 30px; padding: 5px 10px; display: flex; align-items: center;
-            gap: 8px; z-index: 9999; user-select: none; touch-action: none; 
-            transition: transform 0.1s ease-out; /* Mượt hơn khi kéo */
+            gap: 8px; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            user-select: none; touch-action: none; transition: background 0.3s ease;
         }
-        .drag-handle { color: var(--text-main); cursor: grab; padding: 5px; display: flex; align-items: center; justify-content: center; width: 24px; opacity: 0.7; }
+        .drag-handle { color: rgba(255, 255, 255, 0.6); cursor: grab; padding: 5px; display: flex; align-items: center; justify-content: center; width: 24px; }
         .drag-handle:active { cursor: grabbing; }
 
         .floating-bubble button {
-            background: rgba(255,255,255,0.2); border: 1px solid var(--glass-border);
-            color: var(--text-main); font-size: 1.1rem; padding: 0; border-radius: 50%;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-size: 1.1rem; padding: 0; border-radius: 50%;
             width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; transition: background 0.2s, transform 0.2s;
-            outline: none; font-weight: bold; flex-shrink: 0;
+            justify-content: center; cursor: pointer; transition: 0.2s; outline: none; font-weight: bold; flex-shrink: 0;
         }
-        .floating-bubble button:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-
-        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 300px; transition: max-width 0.3s ease, opacity 0.3s ease; }
+        .floating-bubble button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .bubble-actions { display: flex; gap: 8px; overflow: hidden; max-width: 250px; transition: max-width 0.3s ease, opacity 0.3s ease; }
         .floating-bubble.collapsed .bubble-actions { max-width: 0; opacity: 0; pointer-events: none; }
-        .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* Thanh điều hướng */
         .nav-bar { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 200; border-radius: 20px; overflow: hidden; }
-        .nav-bar a {
-            color: var(--text-main); text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s;
-            background: transparent; border: none;
-        }
+        .nav-bar a { color: var(--text-main); text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; background: transparent; border: none; }
         .nav-bar a:hover, .nav-bar a.active { background: rgba(255,255,255,0.25); box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
         body.dark-theme .nav-bar a:hover, body.dark-theme .nav-bar a.active { background: rgba(255,255,255,0.15); }
 
         /* Bảng điều khiển */
         .control-panel {
-            padding: 20px; border-radius: 20px; margin-top: 50px; margin-bottom: 25px;
-            display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 1050px; z-index: 100;
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; margin-top: 50px; margin-bottom: 25px;
+            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 1050px; z-index: 100;
         }
-        .control-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); }
-        .time-group { border-bottom: none; padding-bottom: 0; }
+        .control-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+        /* MẪU THI (PRESETS) */
+        .preset-group {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+            padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); margin-bottom: 5px;
+        }
+        .btn-preset {
+            background: rgba(255,255,255,0.15); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        body.dark-theme .btn-preset { background: rgba(255,255,255,0.05); }
+        .btn-preset:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        body.dark-theme .btn-preset:hover { background: rgba(255,255,255,0.2); }
 
         label { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         input[type="time"], input[type="number"], select { 
-            padding: 6px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; 
+            padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 14px; 
             background: rgba(255,255,255,0.2); color: var(--text-main); font-weight: 600; outline: none;
         }
         body.dark-theme input, body.dark-theme select { background: rgba(0,0,0,0.3); }
-        input[type="text"] { width: 100px; font-family: monospace; }
-        input[type="checkbox"], input[type="radio"] { cursor: pointer; margin: 0; }
-        input[type="range"] { width: 80px; accent-color: var(--text-main); }
+        input[type="text"] { width: 120px; font-family: monospace; }
         
-        .radio-group { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.05); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--glass-border); }
-        body.dark-theme .radio-group { background: rgba(255,255,255,0.05); }
-
-        .helper-text { text-align: center; font-style: italic; font-size: 12px; margin-top: -5px; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); opacity: 0.8; }
-
-        button.btn-apply-inline, button.btn-panel {
-            background: rgba(255,255,255,0.25); color: var(--text-main); border: 1px solid var(--glass-border);
-            border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .btn-icon-sound {
+            background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 5px; 
+            transition: transform 0.2s; outline: none;
         }
-        body.dark-theme button.btn-apply-inline, body.dark-theme button.btn-panel { background: rgba(255,255,255,0.1); }
-        
-        button.btn-apply-inline { padding: 6px 15px; text-transform: uppercase; margin-left: 5px; }
-        button.btn-panel { padding: 12px 25px; text-transform: uppercase; }
-        
-        button.btn-apply-inline:hover, button.btn-panel:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); }
-        body.dark-theme button.btn-apply-inline:hover, body.dark-theme button.btn-panel:hover { background: rgba(255,255,255,0.2); }
-        
-        #btnStart { background: rgba(39, 174, 96, 0.7); color: white; border: none; }
-        #btnReset { background: rgba(231, 76, 60, 0.7); color: white; border: none; }
+        .btn-icon-sound:hover { transform: scale(1.2); }
+
+        .btn-apply-inline {
+            background: #3498db; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-left: 10px;
+        }
+        .btn-apply-inline:hover { background: #2980b9; transform: translateY(-1px); }
+
+        .btn-group { display: flex; gap: 20px; justify-content: center; padding-top: 15px; margin-top: 10px; border-top: 1px solid var(--glass-border); }
+        .btn-panel { padding: 15px 30px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 16px; letter-spacing: 1px; }
+        #btnStart { background: rgba(39, 174, 96, 0.9); color: white; }
+        #btnReset { background: rgba(231, 76, 60, 0.9); color: white; }
+        .btn-panel:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); filter: brightness(1.1); }
+        .btn-panel:active { transform: translateY(1px); }
         button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-        /* Bảng hiển thị (Tấm kính lớn) */
+        /* Bảng hiển thị chính */
         .board {
-            border-radius: 20px; padding: 60px 50px; width: var(--board-width); max-width: 1100px; min-height: var(--board-min-height);
-            position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; margin: auto 0;
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-image: linear-gradient(to right, #1e5128, #1e5128); /* Giữ màu xanh lá đậm truyền thống */
+            border: 15px solid #8b5a2b; border-radius: 20px; padding: 60px 50px; width: 85%; max-width: 1100px; min-height: 350px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 15px 30px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: auto 0;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .board.minimal { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
+
+        /* MENU CHỌN ĐỒNG HỒ (TÀNG HÌNH & HIỆN KHI HOVER) */
+        .clocks-container {
+            position: relative; padding: 30px; display: flex; justify-content: center; align-items: center; width: 100%;
         }
         
-        .board.minimal {
-            background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important;
+        .clock-selector-menu {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%) translateY(10px);
+            opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; gap: 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            padding: 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
+            z-index: 100;
+        }
+        /* Chỉ hiện menu khi hover vào vùng chứa đồng hồ */
+        .clocks-container:hover .clock-selector-menu {
+            opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
         }
 
-        .clocks-wrapper { display: flex; align-items: center; gap: 50px; margin-bottom: 40px; }
+        .clock-option {
+            padding: 10px 25px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; color: #ecf0f1;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .clock-option:hover { background: rgba(0,0,0,0.3); color: #fff; }
+        .clock-option.active { background: #ecf0f1; color: #2c3e50; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
-        /* Đồng hồ kim thích ứng theme */
-        .analog-clock { width: 220px; height: 220px; border: 4px solid var(--text-main); border-radius: 50%; position: relative; display: none; }
-        .analog-clock::before { content: ''; position: absolute; width: 14px; height: 14px; background: var(--text-main); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; }
-        .clock-number { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px; color: var(--text-main); font-family: -apple-system, sans-serif; font-size: 1.5rem; font-weight: 600; z-index: 5; }
-        .hand { position: absolute; bottom: 50%; transform-origin: bottom center; background: var(--text-main); border-radius: 10px; }
-        .hour-hand { width: 6px; height: 55px; left: calc(50% - 3px); z-index: 10; }
-        .minute-hand { width: 4px; height: 85px; left: calc(50% - 2px); opacity: 0.7; z-index: 11; }
-        .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #e74c3c; z-index: 12; }
+        .clocks-wrapper { display: flex; align-items: center; gap: 50px; }
 
-        /* Đồng hồ số */
-        .digital-clock { font-family: -apple-system, sans-serif; font-size: 6rem; font-weight: bold; color: var(--text-main); letter-spacing: -2px; display: none; }
+        /* ĐỒNG HỒ KIM GLOWING */
+        .analog-clock { 
+            width: 220px; height: 220px; border: 6px solid #ecf0f1; border-radius: 50%; position: relative; 
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+            box-shadow: inset 0 0 25px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.4), 0 15px 35px rgba(0,0,0,0.4);
+            display: none; backdrop-filter: blur(10px);
+        }
+        .analog-clock::after {
+            content: ''; position: absolute; top: 2%; left: 5%; width: 90%; height: 45%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent); border-radius: 50% 50% 0 0; pointer-events: none;
+        }
+        .analog-clock::before { content: ''; position: absolute; width: 16px; height: 16px; background: #ecf0f1; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 10px #ecf0f1; }
+        .clock-number { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px; text-align: center; line-height: 40px; color: #ecf0f1; font-family: -apple-system, sans-serif; font-size: 1.6rem; font-weight: bold; z-index: 5; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
+        .hand { position: absolute; bottom: 50%; transform-origin: bottom center; background: #ecf0f1; border-radius: 10px; box-shadow: 0 0 8px rgba(255,255,255,0.6); }
+        .hour-hand { width: 8px; height: 55px; left: calc(50% - 4px); z-index: 10; }
+        .minute-hand { width: 5px; height: 85px; left: calc(50% - 2.5px); opacity: 0.8; z-index: 11; }
+        .second-hand { width: 2px; height: 100px; left: calc(50% - 1px); background: #ff4757; box-shadow: 0 0 10px #ff4757; z-index: 12; }
 
-        /* Trục thời gian thích ứng theme */
+        /* ĐỒNG HỒ SỐ */
+        .digital-clock { font-family: -apple-system, sans-serif; font-size: 6.5rem; font-weight: bold; color: #ecf0f1; display: none; letter-spacing: -2px; text-shadow: 0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(44,62,80,0.4); }
+
+        /* TRỤC THỜI GIAN */
         .timeline-container { position: relative; width: 100%; margin-top: 20px; display: block; }
-        .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: -apple-system, sans-serif; font-weight: bold; color: var(--text-main); }
+        .time-label { position: absolute; top: -60px; font-size: 2.2rem; font-family: -apple-system, sans-serif; font-weight: bold; color: #ecf0f1; text-shadow: 0 0 10px rgba(255,255,255,0.6); }
         .start-label { left: 0; transform: translateX(-20%); }
         .end-label { right: 0; transform: translateX(20%); }
 
-        .timeline-track { position: relative; display: flex; width: 100%; height: 4px; background-color: var(--text-main); border-radius: 2px; }
-        .timeline-track::after { content: ''; position: absolute; right: -20px; top: -8px; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 20px solid var(--text-main); transition: border-color 0.3s; }
+        .timeline-track { position: relative; display: flex; width: 100%; height: 6px; background-color: #ecf0f1; border-radius: 3px; box-shadow: 0 0 12px rgba(255,255,255,0.6); }
+        .timeline-track::after { content: ''; position: absolute; right: -22px; top: -9px; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 24px solid #ecf0f1; transition: all 0.3s ease; filter: drop-shadow(0 0 8px rgba(255,255,255,0.6)); }
         
-        .running .timeline-track::after { border-left-color: #e74c3c; animation: blink 1.5s infinite; filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.8)); }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .running .timeline-track::after { border-left-color: #ff4757; animation: blink 1.5s infinite; filter: drop-shadow(0 0 10px #ff4757); }
+        @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.95); } }
 
         .segment { flex: 1; position: relative; }
-        .segment::before { content: ''; position: absolute; left: 0; top: -10px; width: 3px; height: 24px; background-color: var(--text-main); border-radius: 2px; }
-        .segment:last-child::after { content: ''; position: absolute; right: 0; top: -10px; width: 3px; height: 24px; background-color: var(--text-main); border-radius: 2px; }
-        .tick-label { position: absolute; bottom: -45px; right: -2px; transform: translateX(50%); font-family: -apple-system, sans-serif; font-weight: bold; font-size: 1.4rem; color: var(--text-main); opacity: 0.8; }
+        .segment::before, .segment:last-child::after { content: ''; position: absolute; top: -12px; width: 4px; height: 30px; background-color: #ecf0f1; border-radius: 2px; box-shadow: 0 0 8px rgba(255,255,255,0.6); }
+        .segment::before { left: 0; } .segment:last-child::after { right: 0; }
+        .tick-label { position: absolute; bottom: -45px; right: -2px; transform: translateX(50%); font-family: -apple-system, sans-serif; font-size: 1.5rem; font-weight: bold; color: #ecf0f1; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
 
-        .slash-nhieunet { position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%); background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 11px); display: none; z-index: 10; }
+        .slash-nhieunet { position: absolute; width: 100%; height: 40px; top: 50%; transform: translateY(-50%); background: repeating-linear-gradient(-60deg, transparent, transparent 8px, var(--slash-color) 8px, var(--slash-color) 12px); display: none; z-index: 10; }
         .crossed .slash-nhieunet { display: block; }
 
-        .time-up { display: none; position: absolute; bottom: 30px; right: 40px; font-size: 4rem; color: #e74c3c; font-weight: bold; transform: rotate(-5deg); z-index: 50; text-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .time-up { display: none; position: absolute; bottom: 30px; right: 40px; font-size: 4rem; color: #ff4757; font-weight: bold; transform: rotate(-5deg); z-index: 50; text-shadow: 0 5px 20px rgba(255, 71, 87, 0.6); }
         
-        .footer-copyleft { margin-top: 20px; font-size: 12px; text-align: center; opacity: 0.7; line-height: 1.5; font-weight: 500; }
-        .footer-copyleft a { color: var(--text-main); text-decoration: underline; }
+        .board-style-btn, .board-controls button { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 1.2rem; padding: 5px 8px; border-radius: 5px; cursor: pointer; opacity: 0.3; transition: 0.3s; outline: none; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .board-style-btn { position: absolute; top: 15px; left: 15px; z-index: 50; }
+        .board-controls { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 50; }
+        .board-style-btn:hover, .board-controls button:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+
+        .footer-copyleft { margin-top: 20px; font-size: 12px; text-align: center; opacity: 0.8; line-height: 1.5; font-weight: 500; }
+        .footer-copyleft a { color: var(--text-main); text-decoration: underline; font-weight: bold; }
+
+        svg { width: 18px; height: 18px; fill: currentColor; }
 
         @media (max-width: 600px) {
-            .clocks-wrapper { flex-direction: column; gap: 20px; }
-            .board { padding: 40px 20px; }
+            .board { padding: 40px 20px; width: 95%; }
+            .digital-clock { font-size: 4rem; }
             .time-label { font-size: 1.5rem; top: -45px; }
             .tick-label { font-size: 1.2rem; bottom: -30px; }
             .control-panel { margin-top: 70px; }
-            .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; padding: 10px; }
+            .preset-group { gap: 5px; }
+            .btn-preset { padding: 6px 10px; font-size: 11px; }
+            .btn-apply-inline { width: 100%; margin-left: 0; margin-top: 10px; }
+            .btn-group { flex-direction: column; }
         }
     </style>
 </head>
@@ -188,14 +218,11 @@
 
     <div class="floating-bubble glass-panel" id="floatingMenu">
         <div class="drag-handle" id="dragHandle" title="Kéo để di chuyển">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
         </div>
         <button id="btnCollapseBubble" title="Thu gọn/Mở rộng">◀</button>
         <div class="bubble-actions" id="bubbleActions">
             <button id="btnThemeToggle" title="Giao diện Sáng/Tối">🌗</button>
-            <button id="btnToggleBoard" title="Ẩn nền bảng">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
-            </button>
             <button id="btnToggleUI" title="Cài đặt">⚙️</button>
             <button id="btnFullscreen" title="Toàn màn hình">⛶</button>
         </div>
@@ -206,52 +233,57 @@
         <a href="dongho.html">Đồng Hồ</a>
     </div>
 
-    <div class="control-panel glass-panel" id="controlPanel">
+    <div class="control-panel" id="controlPanel">
+        
+        <div class="preset-group">
+            <span style="font-size: 14px; font-weight: bold; margin-right: 5px;">Mẫu thi nhanh:</span>
+            <button class="btn-preset" onclick="applyPreset(120, 30, '30, 60, 90')">Văn (120p)</button>
+            <button class="btn-preset" onclick="applyPreset(90, 30, '30, 60')">Toán (90p)</button>
+            <button class="btn-preset" onclick="applyPreset(50, 10, '10, 20, 30, 40')">Tự chọn (50p)</button>
+            <button class="btn-preset" onclick="applyPreset(150, 30, '30, 60, 90, 120')">ĐGNL (150p)</button>
+        </div>
+
         <div class="control-group time-group">
             <label>Bắt đầu: <input type="time" id="startTime" value="08:30"></label>
             <label>Thời lượng: <input type="number" id="durationTime" value="150" style="width:55px"> p</label>
             <label>Mỗi vạch: <input type="number" id="intervalTime" value="30" style="width:45px"> p</label>
-            <label>Hiện mốc: <input type="text" id="customLabels" value="30, 60, 120"></label>
+            <label>Mốc hiện: <input type="text" id="customLabels" value="30, 60, 120"></label>
             <select id="labelMode">
                 <option value="elapsed">Đã qua (30p)</option>
-                <option value="clock">Giờ thực (9h00)</option>
+                <option value="clock" selected>Giờ thực (9h00)</option>
             </select>
+            <button id="btnToggleSound" class="btn-icon-sound" title="Bật/Tắt Âm thanh">🔔</button>
             <button class="btn-apply-inline" id="btnApply" onclick="applySettings()">🔄 Áp Dụng</button>
         </div>
-        <div class="helper-text">* Vui lòng nhấn "Áp dụng" ngay sau khi thay đổi thời gian.</div>
 
-        <div class="control-group">
-            <label>Độ ngang bảng: <input type="range" id="boardWidth" min="50" max="100" value="85"></label>
-            <label>Độ cao: <input type="range" id="boardHeight" min="250" max="700" value="350"></label>
-            <label>Màu gạch chéo: <input type="color" id="slashColor" value="#e74c3c"></label>
-        </div>
-
-        <div class="control-group">
-            <div class="radio-group">
-                <span style="font-size: 13px; font-weight: bold;">Đồng hồ:</span>
-                <label><input type="radio" name="clockType" value="analog" checked> Kim</label>
-                <label><input type="radio" name="clockType" value="digital"> Số</label>
-                <label><input type="radio" name="clockType" value="none"> Ẩn</label>
-            </div>
-            <div class="divider"></div>
-            <label><input type="checkbox" id="checkTimeline" checked> Hiện trục số</label>
-            <label><input type="checkbox" id="soundToggle" checked> Bật âm thanh</label>
-        </div>
-        
         <div class="btn-group">
-            <button class="btn-panel" id="btnStart" onclick="startTimer()">▶ Bắt Đầu Tính Giờ</button>
-            <button class="btn-panel" id="btnReset" onclick="resetTimer()">⏹ Đặt Lại</button>
+            <button class="btn-panel" id="btnStart" onclick="startTimer()">BẮT ĐẦU TÍNH GIỜ [SPACE]</button>
+            <button class="btn-panel" id="btnReset" onclick="resetTimer()">ĐẶT LẠI</button>
         </div>
     </div>
 
-    <div class="board glass-panel" id="mainBoard">
-        <div class="clocks-wrapper">
-            <div id="analogClock" class="analog-clock">
-                <div class="hand hour-hand" id="hourHand"></div>
-                <div class="hand minute-hand" id="minuteHand"></div>
-                <div class="hand second-hand" id="secondHand"></div>
+    <div class="board" id="mainBoard">
+        <button id="btnToggleBoard" class="board-style-btn" title="Ẩn nền bảng">☒</button>
+        <div class="board-controls">
+            <button id="btnToggleUI_Board" title="Ẩn/Hiện Cài đặt">⚙️</button>
+            <button id="btnFullscreen_Board" title="Toàn màn hình">⛶</button>
+        </div>
+
+        <div class="clocks-container">
+            <div class="clock-selector-menu" id="clockMenu">
+                <div class="clock-option active" data-type="analog">Kim</div>
+                <div class="clock-option" data-type="digital">Số</div>
+                <div class="clock-option" data-type="none">Ẩn</div>
             </div>
-            <div id="digitalClock" class="digital-clock">0:00:00</div>
+
+            <div class="clocks-wrapper">
+                <div id="analogClock" class="analog-clock">
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
+                </div>
+                <div id="digitalClock" class="digital-clock">0:00:00</div>
+            </div>
         </div>
 
         <div class="timeline-container" id="timelineContainer">
@@ -269,23 +301,46 @@
     </div>
 
     <script>
-        // --- CHUYỂN ĐỔI GIAO DIỆN (THEME) ---
+        // --- CHUYỂN ĐỔI THEME SÁNG / TỐI ---
         const btnThemeToggle = document.getElementById('btnThemeToggle');
-        btnThemeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
+        btnThemeToggle.addEventListener('click', () => { document.body.classList.toggle('dark-theme'); });
+
+        // --- MẪU THI (PRESETS) ---
+        function applyPreset(duration, interval, labels) {
+            if (isRunning && !confirm("Đồng hồ đang chạy! Đặt lại để áp dụng mẫu thi mới?")) return;
+            document.getElementById('durationTime').value = duration;
+            document.getElementById('intervalTime').value = interval;
+            document.getElementById('customLabels').value = labels;
+            applySettings();
+        }
+
+        // --- ÂM THANH (BELL ICON) ---
+        let soundEnabled = true;
+        const btnToggleSound = document.getElementById('btnToggleSound');
+        btnToggleSound.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            btnToggleSound.textContent = soundEnabled ? '🔔' : '🔕';
+            btnToggleSound.style.opacity = soundEnabled ? '1' : '0.5';
         });
 
-        // --- WAKE LOCK API ---
-        let wakeLock = null;
-        async function keepScreenAwake() {
-            try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-        }
-        function allowScreenSleep() {
-            if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
-        }
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && isRunning) keepScreenAwake(); });
+        // --- MENU CHỌN ĐỒNG HỒ (HOVER) ---
+        let currentClockType = 'analog'; // Mặc định là Kim
+        const clockOptions = document.querySelectorAll('.clock-option');
+        clockOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                clockOptions.forEach(o => o.classList.remove('active'));
+                e.target.classList.add('active');
+                currentClockType = e.target.getAttribute('data-type');
+                updateVisibility();
+            });
+        });
 
-        // --- KÉO THẢ BONG BÓNG ---
+        const updateVisibility = () => {
+            document.getElementById('digitalClock').style.display = (currentClockType === 'digital') ? 'block' : 'none';
+            document.getElementById('analogClock').style.display = (currentClockType === 'analog') ? 'block' : 'none';
+        };
+
+        // --- KÉO THẢ BONG BÓNG MENU ---
         const floatingMenu = document.getElementById('floatingMenu');
         const dragHandle = document.getElementById('dragHandle');
         const btnCollapseBubble = document.getElementById('btnCollapseBubble');
@@ -301,21 +356,19 @@
                 isDragging = true;
                 dragStartX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
                 dragStartY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-                floatingMenu.style.transition = 'none'; // Tắt transition khi kéo
+                floatingMenu.style.transition = 'none';
             }
         }
         function drag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
+            if (!isDragging) return; e.preventDefault();
             let dx = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - dragStartX;
             let dy = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - dragStartY;
             requestAnimationFrame(() => floatingMenu.style.transform = `translate3d(${dx}px, ${dy}px, 0)`);
         }
         function dragEnd() {
-            if (!isDragging) return;
-            isDragging = false;
+            if (!isDragging) return; isDragging = false;
             const rect = floatingMenu.getBoundingClientRect();
-            floatingMenu.style.transform = 'none'; floatingMenu.style.transition = '';
+            floatingMenu.style.transform = 'none'; floatingMenu.style.transition = 'transform 0.1s ease-out';
             floatingMenu.style.top = Math.max(0, Math.min(rect.top, window.innerHeight - rect.height)) + 'px';
             if (rect.left + rect.width / 2 > window.innerWidth / 2) {
                 floatingMenu.style.left = 'auto'; floatingMenu.style.right = Math.max(0, window.innerWidth - rect.right) + 'px';
@@ -323,32 +376,33 @@
                 floatingMenu.style.right = 'auto'; floatingMenu.style.left = Math.max(0, rect.left) + 'px';
             }
         }
-        floatingMenu.addEventListener("touchstart", dragStart, { passive: false });
-        document.addEventListener("touchmove", drag, { passive: false });
-        document.addEventListener("touchend", dragEnd);
-        floatingMenu.addEventListener("mousedown", dragStart);
-        document.addEventListener("mousemove", drag);
-        document.addEventListener("mouseup", dragEnd);
+        floatingMenu.addEventListener("touchstart", dragStart, { passive: false }); document.addEventListener("touchmove", drag, { passive: false }); document.addEventListener("touchend", dragEnd);
+        floatingMenu.addEventListener("mousedown", dragStart); document.addEventListener("mousemove", drag); document.addEventListener("mouseup", dragEnd);
 
-        // --- CÁC NÚT ĐIỀU KHIỂN GIAO DIỆN ---
-        const navBar = document.getElementById('navBar');
-        const controlPanel = document.getElementById('controlPanel');
-        const boardEl = document.getElementById('mainBoard');
-        const footerCopy = document.getElementById('footerCopy');
+        // --- CÁC NÚT GIAO DIỆN KHÁC ---
+        const navBar = document.getElementById('navBar'); const controlPanel = document.getElementById('controlPanel');
+        const boardEl = document.getElementById('mainBoard'); const footerCopy = document.getElementById('footerCopy');
         
-        document.getElementById('btnToggleUI').addEventListener('click', () => {
-            navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden');
-        });
-        document.getElementById('btnFullscreen').addEventListener('click', () => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
-            else document.exitFullscreen();
-        });
+        const toggleUIfunc = () => { navBar.classList.toggle('hidden'); controlPanel.classList.toggle('hidden'); footerCopy.classList.toggle('hidden'); };
+        document.getElementById('btnToggleUI').addEventListener('click', toggleUIfunc);
+        document.getElementById('btnToggleUI_Board').addEventListener('click', toggleUIfunc);
+
+        const toggleFullscreenFunc = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); };
+        document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreenFunc);
+        document.getElementById('btnFullscreen_Board').addEventListener('click', toggleFullscreenFunc);
+
         document.getElementById('btnToggleBoard').addEventListener('click', () => {
             boardEl.classList.toggle('minimal');
-            document.getElementById('btnToggleBoard').innerHTML = boardEl.classList.contains('minimal') ? '☐' : '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>';
+            document.getElementById('btnToggleBoard').textContent = boardEl.classList.contains('minimal') ? '☐' : '☒';
         });
 
-        // --- LOGIC THỜI GIAN ---
+        // --- WAKE LOCK API (Chống tắt màn hình) ---
+        let wakeLock = null;
+        async function keepScreenAwake() { try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
+        function allowScreenSleep() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && isRunning) keepScreenAwake(); });
+
+        // --- LOGIC THỜI GIAN & PHÍM TẮT ---
         let timerInterval, audioCtx;
         let totalSeconds = 0, remainingSeconds = 0, segmentDurationSeconds = 0;
         let startH = 0, startM = 0; 
@@ -357,10 +411,17 @@
         const timelineEl = document.getElementById('timeline');
         const digitalClockEl = document.getElementById('digitalClock');
         const analogClockEl = document.getElementById('analogClock');
-        const timelineContainerEl = document.getElementById('timelineContainer');
-        const rootVars = document.documentElement.style;
-
+        
         window.addEventListener('beforeunload', e => { if (isRunning) { e.preventDefault(); e.returnValue = ''; }});
+
+        // Lắng nghe phím Space
+        document.addEventListener('keydown', (e) => {
+            // Nếu bấm Space và không phải đang gõ text/số vào input
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+                e.preventDefault(); // Tránh cuộn trang
+                if (!isRunning) startTimer();
+            }
+        });
 
         function drawClockNumbers() {
             const clock = document.getElementById('analogClock');
@@ -372,27 +433,13 @@
         }
         drawClockNumbers();
 
-        const updateVisibility = () => {
-            const clockType = document.querySelector('input[name="clockType"]:checked').value;
-            digitalClockEl.style.display = (clockType === 'digital') ? 'block' : 'none';
-            analogClockEl.style.display = (clockType === 'analog') ? 'block' : 'none';
-            timelineContainerEl.style.display = document.getElementById('checkTimeline').checked ? 'block' : 'none';
-        };
-
-        document.querySelectorAll('input[name="clockType"]').forEach(r => r.addEventListener('change', updateVisibility));
-        document.getElementById('checkTimeline').addEventListener('change', updateVisibility);
-        
-        document.getElementById('slashColor').addEventListener('input', e => rootVars.setProperty('--slash-color', e.target.value));
-        document.getElementById('boardWidth').addEventListener('input', e => rootVars.setProperty('--board-width', e.target.value + '%'));
-        document.getElementById('boardHeight').addEventListener('input', e => rootVars.setProperty('--board-min-height', e.target.value + 'px'));
-
         function formatDigitalTime(s) {
             const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
         function playSound(type) {
-            if (!document.getElementById('soundToggle').checked) return;
+            if (!soundEnabled) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -479,7 +526,7 @@
         }
 
         function applySettings() {
-            if (isRunning && !confirm("Đồng hồ đang chạy! Bạn muốn đặt lại không?")) return;
+            if (isRunning && !confirm("Đồng hồ đang chạy! Bạn có chắc chắn muốn hủy bỏ tiến trình và đặt lại không?")) return;
             clearInterval(timerInterval); isRunning = false; allowScreenSleep(); document.getElementById('btnStart').disabled = false; init();
         }
 
@@ -498,7 +545,6 @@
 
         function resetTimer() { if (isRunning && !confirm("Đồng hồ đang chạy! Bạn muốn đặt lại không?")) return; applySettings(); }
 
-        document.documentElement.style.setProperty('--board-min-height', document.getElementById('boardHeight').value + 'px');
         init();
     </script>
 </body>
